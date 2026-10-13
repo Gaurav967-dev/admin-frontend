@@ -312,7 +312,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
 
           {/* Column 1 - Employee Details */}
-          <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1c2230]">
+          <section className="min-w-0 rounded-xl border bg-white p-4 dark:bg-slate-900">
 
             <div className="mb-7 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/40">
@@ -332,7 +332,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-3">
               <ProfileField
                 id="first-name"
                 label="First Name"
@@ -377,7 +377,7 @@ export default function ProfilePage() {
           </section>
 
           {/* Column 2 - Organization */}
-          <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1c2230]">
+          <section className="min-w-0 rounded-xl border bg-white p-4 dark:bg-slate-900">
 
             <div className="mb-7 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40">
@@ -397,7 +397,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-3">
 
               {/* Role comes from the auth database */}
               <ProfileField
@@ -464,7 +464,7 @@ export default function ProfilePage() {
           </section>
 
           {/* Column 3 - Onboarding */}
-          <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#1c2230] lg:col-span-2 xl:col-span-1">
+          <section className="min-w-0 rounded-xl border bg-white p-4 dark:bg-slate-900">
 
             <div className="mb-7 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-green-50 dark:bg-green-950/40">
@@ -597,18 +597,21 @@ export default function ProfilePage() {
                         </span>
                       </div>
 
-                      {/* Editable progress slider */}
-                      <input
-                        type="range"
-                        min={0}
-                        max={100}
-                        step={5}
-                        value={task.progress}
-                        disabled={ !form.onboarding_required || !task.enabled}
-                        onChange={(event) => updateTask(task.key, { progress: Number(event.target.value) })}
+                      <div
+                        role="progressbar"
                         aria-label={`${task.label} progress`}
-                        className="mt-3 h-2 w-full cursor-pointer accent-[#6048ce] disabled:cursor-not-allowed disabled:opacity-40"
-                      />
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={task.progress}
+                        className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
+                      >
+                        <div
+                          className="h-full rounded-full bg-sky-500 transition-all"
+                          style={{
+                            width: `${task.progress}%`,
+                          }}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>

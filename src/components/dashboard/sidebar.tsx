@@ -87,14 +87,7 @@ export default function Sidebar({
       )}
 
       <aside
-        className={`
-          fixed inset-y-0 left-0 z-50 flex w-64 shrink-0
-          flex-col border-r border-slate-200 bg-[#f6f7fb]
-          transition-transform duration-300
-          dark:border-slate-800 dark:bg-[#151a25]
-          lg:static lg:translate-x-0
-          ${open ? "translate-x-0" : "-translate-x-full"}
-        `}
+        className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-64 shrink-0 flex-col overflow-hidden lg:static lg:h-full`}
       >
         {/* Brand */}
         <div className="flex h-20 items-center gap-3 px-7">
@@ -111,7 +104,7 @@ export default function Sidebar({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 px-4 pt-5">
+        <nav className="flex-1 min-h-0 overflow-y-auto">
           <div className="mb-2 border-b border-slate-200 px-3 pb-3 text-xs font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400">
             My View
           </div>
@@ -137,9 +130,7 @@ export default function Sidebar({
                 href={item.href}
                 onClick={close}
                 aria-current={active ? "page" : undefined}
-                className={`
-                  flex items-center gap-3 rounded-lg px-4 py-3
-                  text-sm font-medium transition-all duration-200
+                className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200
                   ${
                     active ? "bg-[#6048ce] text-white shadow-sm" : "text-slate-600 hover:bg-slate-200/70 dark:text-slate-300 dark:hover:bg-slate-800"
                   }
@@ -159,7 +150,7 @@ export default function Sidebar({
         </nav>
 
         {/* Bottom section */}
-        <div className="space-y-3 border-t border-slate-200 p-5 dark:border-slate-800">
+        <div className="space-y-3 mt-auto shrink-0 border-t border-slate-200 p-5 dark:border-slate-800">
           <div className="rounded-lg bg-white p-3 dark:bg-slate-800">
             <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
               {user.name}
