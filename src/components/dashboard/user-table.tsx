@@ -114,8 +114,10 @@ export default function UserTable({
       setPage(1);
     }, 300);
 
-    return () => window.clearTimeout(timer);
-  })
+    return () => {
+      window.clearTimeout(timer);
+    }
+  }, [search]);
 
   useEffect(() => {
     void loadUsers();
@@ -145,7 +147,7 @@ export default function UserTable({
 
   const startRow = totalMatches === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
 
-  const endRow = Math.min(totalMatches, startRow + pageRows.length - 1);
+  const endRow = totalMatches === 0 ? 0 : Math.min(totalMatches, startRow + pageRows.length - 1);
 
   function handleMutationSuccess(message: string) {
     setNotice(message);
