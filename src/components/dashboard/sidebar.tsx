@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 import { LayoutGridIcon } from "@/components/icons/layout-grid";
 import { UsersIcon } from "@/components/icons/users";
@@ -57,22 +58,18 @@ export default function Sidebar({
     setLogoutError("");
 
     try {
-      const response = await fetch(
-        `${API_URL}/logout`,
+      await apiFetch<{ message: string }>(
+        "/logout",
         {
           method: "POST",
-          credentials: "include",
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Logout failed");
-      }
-
       router.replace("/");
       router.refresh();
-    } catch {
-      setLogoutError("Could not sign out. Please retry.");
+    } catch (error) {
+      setLogoutError(error instanceof Error ? error.message : "Could not sign out. Please retry.");
+    } finally {
       setLoggingOut(false);
     }
   }
