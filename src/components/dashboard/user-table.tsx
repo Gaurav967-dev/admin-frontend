@@ -4,11 +4,10 @@ import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-
 import { RefreshCWIcon } from "@/components/icons/refresh-cw";
 import { EyeIcon } from "@/components/icons/eye";
+import { UsersIcon } from "@/components/icons/users";
 
 import { useDashboardSearch } from "./search-context";
 
@@ -17,12 +16,7 @@ import { apiFetch, ApiError } from "@/lib/api";
 import UserFormDialog from "./user-form-dialog";
 import DeleteUserDialog from "./delete-user-dialog";
 
-import { UsersIcon } from "@/components/icons/users";
-
-import type {
-  DashboardResponse,
-  DashboardUser,
-} from "@/types/dashboard";
+import type { DashboardResponse, DashboardUser, PaginatedUsersResponse } from "@/types/dashboard";
 
 type Filter = "all" | "active" | "inactive" | "admins";
 
@@ -33,6 +27,10 @@ const filters: { label: string; value: Filter }[] = [
   { label: "Admins", value: "admins" },
 ];
 
+type TableResponse = DashboardResponse & Partial<PaginatedUsersResponse>;
+
+const PAGE_SIZE = 5;
+
 export default function UserTable({
   management = false,
 }: {
@@ -41,7 +39,9 @@ export default function UserTable({
   const { search } = useDashboardSearch();
   const latestRequestId = useRef(0);
 
-  const [data, setData] = useState<DashboardResponse | null>(null);
+  const [data, setData] = useState<TableResponse | null>(null);
+  const [page, setPage] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -63,18 +63,28 @@ export default function UserTable({
     setError("");
 
     try {
-      const result = await apiFetch<DashboardResponse>(
-        management ? "/user" : "/dashboard"
-      );
-      console.log("GET response user IDs:", result.users.map(
-        (user) => user.id
-      ));
+      let path = "/dashboard";
+
+      if (management) {
+        const params = new URLSearchParams({
+          page: String(page),
+          page_size: String(PAGE_SIZE),
+          search: debouncedSearch,
+          status_filter: filter == "active" ? "active" : filter == "inactive" ? "inactive" : "all",
+          role_filter: filter === "admins" ? "admin" : "all",
+        });
+
+        path = `/user?${params.toString()}`;
+      }
+
+      const result = await apiFetch<TableResponse>(path);
 
       if (requestId !== latestRequestId.current) {
         return;
       }
 
       setData(result);
+
     } catch (err) {
       if (requestId !== latestRequestId.current) {
         return;
@@ -82,9 +92,9 @@ export default function UserTable({
 
       if (err instanceof ApiError) {
         if (err.status === 403) {
-          setError("Access denied. Only administrators can view users.");
+          setError("Administrator permission required.");
         } else if (err.status === 401) {
-          setError("Your session has expired. Please sign in again.");
+          setError("Your session has expired.");
         } else {
           setError(err.message);
         }
@@ -96,7 +106,16 @@ export default function UserTable({
         setLoading(false);
       }
     }
-  }, [management]);
+  }, [management, page, filter, debouncedSearch]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(1);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  })
 
   useEffect(() => {
     void loadUsers();
@@ -105,73 +124,45 @@ export default function UserTable({
   const filteredUsers = useMemo(() => {
     if (!data) return [];
 
+    if (management) return data.users;
+
     const query = search.trim().toLowerCase();
 
     return data.users.filter((user) => {
-      let matchesFilter = true;
+      const matchesSearch = user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query) || user.role.toLowerCase().includes(query) || String(user.id).includes(query);
 
-      if (filter === "active") {
-        matchesFilter = user.is_active;
-      }
+      const matchesFilter = filter === "all" || (filter === "active" && user.is_active) || (filter === "inactive" && !user.is_active) || (filter === "admins" && user.role === "admin");
 
-      if (filter === "inactive") {
-        matchesFilter = !user.is_active;
-      }
-
-      if (filter === "admins") {
-        matchesFilter = user.role === "admin";
-      }
-
-      const matchesSearch =
-        user.name.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query) ||
-        user.role.toLowerCase().includes(query) ||
-        String(user.id).includes(query);
-
-      return matchesFilter && matchesSearch;
+      return matchesSearch && matchesFilter;
     });
-  }, [data, filter, search]);
+  }, [data, management, search, filter]);
+
+  const totalPages = management ? (data?.total_pages ?? 1) : Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+
+  const pageRows = management ? filteredUsers : filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const totalMatches = management ? (data?.filtered_total ?? 0) : filteredUsers.length;
+
+  const startRow = totalMatches === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+
+  const endRow = Math.min(totalMatches, startRow + pageRows.length - 1);
 
   function handleMutationSuccess(message: string) {
     setNotice(message);
     void loadUsers();
   }
-  
-  function handleDeleteSuccess(
-    message: string,
-    deletedUserId: number
-  ) {
-    console.log("Deleting user ID:", deletedUserId);
-    console.log(
-      "Current table IDs:",
-      data?.users.map((user) => user.id)
-    );
 
-    // Invalidate any GET requests already in progress.
-    latestRequestId.current += 1;
+  function handleDeleteSuccess(message: string, deletedUserId: number) {
     setNotice(message);
 
-    setData((previous) => {
-      if (!previous) return previous;
+    const deletedLastRow = management && page > 1 && pageRows.length === 1 && pageRows[0].id === deletedUserId;
 
-      const updatedUsers = previous.users.filter(
-        (user) => user.id !== deletedUserId
-      );
-
-      return {
-        ...previous,
-        users: updatedUsers,
-        total_users: updatedUsers.length,
-        active_users: updatedUsers.filter(
-          (user) => user.is_active
-        ).length,
-        admins: updatedUsers.filter(
-          (user) => user.role === "admin"
-        ).length,
-      };
-    });
-
-    void loadUsers();
+    if (deletedLastRow) {
+      // Current page may no longer exist, changing page triggers a fresh API request.
+      setPage((current) => current - 1);
+    } else {
+      void loadUsers();
+    }
   }
 
   return (
@@ -213,9 +204,7 @@ export default function UserTable({
           >
             <RefreshCWIcon
               size={18}
-              className={`flex size-[18px] shrink-0 items-center justify-center ${
-                loading ? "animate-spin" : ""
-              }`}
+              className={`flex size-[18px] shrink-0 items-center justify-center ${loading ? "animate-spin" : ""}`}
             />
             Refresh
           </Button>
@@ -270,12 +259,12 @@ export default function UserTable({
           <button
             key={item.value}
             type="button"
-            onClick={() => setFilter(item.value)}
-            className={`
-              shrink-0 border-b-2 px-2 pb-3 pt-2 text-sm font-medium transition-colors
-              ${
-                filter === item.value ? "border-[#6048ce] text-[#6048ce]" : "border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white"
-              }
+            onClick={() => {
+              setFilter(item.value);
+              setPage(1);
+            }}
+            className={`shrink-0 border-b-2 px-2 pb-3 pt-2 text-sm font-medium transition-colors
+              ${filter === item.value ? "border-[#6048ce] text-[#6048ce]" : "border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white"}
             `}
           >
             {item.label}
@@ -334,7 +323,7 @@ export default function UserTable({
               </thead>
 
               <tbody>
-                {filteredUsers.map((user) => (
+                {pageRows.map((user) => (
                   <tr
                     key={user.id}
                     className="bg-white text-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors hover:bg-slate-50 dark:bg-slate-800/40 dark:text-slate-200 dark:hover:bg-slate-800"
@@ -440,8 +429,37 @@ export default function UserTable({
             </div>
           )}
 
-          <div className="mt-5 text-xs text-slate-500 dark:text-slate-400">
-            Showing {filteredUsers.length} of {data.total_users} users
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Showing {startRow}-{endRow} of {totalMatches} users
+            </p>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={loading || page <= 1}
+                onClick={() => setPage((current) => current - 1)}
+              >
+                Previous
+              </Button>
+
+              <span className="min-w-20 text-center text-xs text-slate-600 dark:text-slate-300">
+                Page {page} of {totalPages}
+              </span>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={loading || page >= totalPages}
+                onClick={() => setPage((current) => current + 1)}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </>
       )}

@@ -14,10 +14,6 @@ import { ShieldCheckIcon } from "@/components/icons/shield-check";
 
 import type { AuthenticatedUser } from "@/types/dashboard";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:8000";
-
 const menuItems = [
   {
     name: "Dashboard",
@@ -87,7 +83,9 @@ export default function Sidebar({
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-64 shrink-0 flex-col overflow-hidden lg:static lg:h-full`}
+        className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-64 shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-[#f6f7fb] shadow-xl transition-transform duration-300 ease-in-out dark:border-slate-800 dark:bg-[#151a25] lg:static lg:h-full lg:translate-x-0 lg:shadow-none
+          ${open ? "translate-x-0" : "-translate-x-full"}
+        `}
       >
         {/* Brand */}
         <div className="flex h-20 items-center gap-3 px-7">
@@ -104,7 +102,7 @@ export default function Sidebar({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 min-h-0 overflow-y-auto">
+        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-4 pt-5">
           <div className="mb-2 border-b border-slate-200 px-3 pb-3 text-xs font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400">
             My View
           </div>
@@ -150,7 +148,7 @@ export default function Sidebar({
         </nav>
 
         {/* Bottom section */}
-        <div className="space-y-3 mt-auto shrink-0 border-t border-slate-200 p-5 dark:border-slate-800">
+        <div className="mt-auto shrink-0 space-y-3 border-t border-slate-200 p-5 dark:border-slate-800">
           <div className="rounded-lg bg-white p-3 dark:bg-slate-800">
             <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
               {user.name}

@@ -24,3 +24,10 @@ export type VerifyResponse = {
     valid: boolean;
     user: AuthenticatedUser;
 };
+
+export type PaginatedUsersResponse = DashboardResponse & {
+    page: number;
+    page_size: number;
+    filtered_total: number;
+    total_pages: number;
+};
