@@ -325,7 +325,7 @@ export default function ProfilePage() {
         className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-7"
       >
 
-        {/* LEFT: Photo and employee details */}
+        {/* Left: Photo and employee details */}
         <section className="min-w-0 space-y-3">
 
           <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -413,7 +413,7 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* MIDDLE: Role and team information */}
+        {/* Middle: Role and team information */}
         <section className="min-w-0 space-y-4">
 
           <div className="space-y-2">
@@ -460,7 +460,7 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* RIGHT: Onboarding */}
+        {/* Right: Onboarding */}
         <section className="min-w-0 space-y-3">
 
           <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -479,13 +479,7 @@ export default function ProfilePage() {
               id="onboarding-start"
               type="date"
               value={form.onboarding_start}
-              onChange={(e) =>
-                setForm((current) =>
-                  current
-                    ? { ...current, onboarding_start: e.target.value }
-                    : current
-                )
-              }
+              onChange={(e) => setForm((current) => current ? { ...current, onboarding_start: e.target.value } : current)}
               className="h-8 border-0 bg-[#f8f9fb] text-xs dark:bg-slate-800"
             />
           </div>
@@ -501,13 +495,7 @@ export default function ProfilePage() {
             <Switch
               id="onboarding-required"
               checked={form.onboarding_required}
-              onCheckedChange={(checked) =>
-                setForm((current) =>
-                  current
-                    ? { ...current, onboarding_required: checked }
-                    : current
-                )
-              }
+              onCheckedChange={(checked) => setForm((current) => current ? { ...current, onboarding_required: checked } : current)}
             />
           </div>
 
@@ -594,5 +582,4 @@ export default function ProfilePage() {
       </form>
     </div>
   );
-
 }
