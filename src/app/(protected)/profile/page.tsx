@@ -16,6 +16,7 @@ import { BriefcaseBusinessIcon } from "@/components/icons/briefcase-business";
 import { CalendarDaysIcon } from "@/components/icons/calendar-days";
 import { ClipboardCheckIcon } from "@/components/icons/clipboard-check";
 import { UserIcon } from "@/components/icons/user";
+import { Copy } from "lucide-react";
 
 import { apiFetch, ApiError } from "@/lib/api";
 
@@ -26,11 +27,12 @@ import type { ProfileData, ProfileFormValues, ProfileSaveResponse, TaskKey } fro
 type TextField = | "first_name" | "last_name" | "email" | "phone" | "position" | "team" | "manager" | "lead";
 
 // A reusable labeled input for the profile.
-function ProfileField({ id, label, value, onChange, type = "text", placeholder = "", required = false, readOnly = false }: {
+function ProfileField({ id, label, value, onChange, onCopy, type = "text", placeholder = "", required = false, readOnly = false }: {
   id: string;
   label: string;
   value: string;
   onChange?: (value: string) => void;
+  onCopy?: () => void;
   type?: string;
   placeholder?: string;
   required?: boolean;
@@ -40,23 +42,38 @@ function ProfileField({ id, label, value, onChange, type = "text", placeholder =
     <div className="space-y-2">
       <Label
         htmlFor={id}
-        className="text-xs font-medium text-slate-500 dark:text-slate-400"
+        className="text-[11px] text-slate-500"
       >
         {label}
       </Label>
 
-      <Input
-        id={id}
-        type={type}
-        value={value}
-        onChange={(event) => onChange?.(event.target.value)}
-        placeholder={placeholder}
-        required={required}
-        readOnly={readOnly}
-        className={`h-9 rounded-lg border-transparent bg-[#f8f9fb] px-4 text-sm text-slate-900 shadow-none focus-visible:border-[#6048ce] focus-visible:ring-[#6048ce]/20 dark:bg-slate-800 dark:text-white
-          ${readOnly ? "cursor-default opacity-70" : ""}
-        `}
-      />
+      <div className="relative">
+        <Input
+          id={id}
+          type={type}
+          value={value}
+          onChange={(event) => onChange?.(event.target.value)}
+          placeholder={placeholder}
+          required={required}
+          readOnly={readOnly}
+          className={`h-8 rounded-lg border-0 bg-[#f8f9fb] px-3 text-xs dark:bg-slate-800
+            ${onCopy ? "pr-10" : ""}
+          `}
+        />
+
+        {onCopy && (
+          <button
+            type="button"
+            onClick={onCopy}
+            disabled={!value}
+            aria-label={`Copy ${label}`}
+            title={`Copy ${label}`}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#6048ce] disabled:opacity-40"
+          >
+            <Copy size={15} />
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -70,7 +87,7 @@ export default function ProfilePage() {
 
   const [loading, setLoading] = useState(true);
 
-  const [saving, setSaving] = useState<"full" | "onboarding" | null>(null);
+  const [saving, setSaving] = useState<"full" | null>(null);
 
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -174,7 +191,6 @@ export default function ProfilePage() {
 
     setError("");
     setNotice("");
-    setSaving("onboarding");
 
     try {
       // Only onboarding fields are updated.
@@ -255,408 +271,328 @@ export default function ProfilePage() {
 
   const status = !form.onboarding_required ? "Not Required" : !hasEnabledTasks ? "Not Started" : progress === 100 ? "Completed" : progress > 0 ? "Onboarding" : "Not Started";
 
-  return (
-    <div className="mx-auto max-w-[1400px]">
+  async function copyText(label: string, value: string) {
+    if (!value) return;
 
-      {/* Page heading */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          
+    try {
+      await navigator.clipboard.writeText(value);
+      setNotice(`${label} copied to clipboard`);
+      setError("");
+    } catch {
+      setError(`Unable to copy ${label.toLowerCase()}`);
+    }
+  }
+
+  
+  return (
+    <div className="mx-auto w-full max-w-[1150px]">
+
+      {/* Page header */}
+      <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-100 pb-3 dark:border-slate-800">
+        <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/dashboard"
             aria-label="Back to dashboard"
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-colors hover:border-[#6048ce] hover:text-[#6048ce] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="text-slate-600 hover:text-[#6048ce]"
           >
-            <ArrowLeftIcon
-              size={20}
-              className="flex size-5 items-center justify-center"
-            />
+            <ArrowLeftIcon size={19} />
           </Link>
 
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
-              {profile.first_name} {profile.last_name}
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Employee profile and onboarding management
-            </p>
-          </div>
+          <h2 className="truncate text-xl font-semibold text-slate-900 dark:text-white">
+            {profile.first_name} {profile.last_name}
+          </h2>
         </div>
 
-        <span className="rounded-full bg-purple-50 px-4 py-2 text-xs font-medium text-[#6048ce] dark:bg-purple-950/40 dark:text-purple-300">
-          Employee ID: EMP-{String(profile.user_id).padStart(5, "0")}
+        <span className="shrink-0 text-xs text-slate-500">
+          EMP-{String(profile.user_id).padStart(5, "0")}
         </span>
       </div>
 
-      {/* Success message */}
-      {notice && (
-        <div
-          role="status"
-          className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700 dark:border-green-900 dark:bg-green-950/30 dark:text-green-400"
-        >
-          {notice}
-        </div>
-      )}
-
-      {/* Error message */}
       {error && (
-        <div
-          role="alert"
-          className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 dark:border-red-900 dark:bg-red-950/30"
-        >
+        <p role="alert" className="mb-2 text-xs text-red-600">
           {error}
-        </div>
+        </p>
       )}
 
-      <form onSubmit={saveFullProfile}>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+      {notice && (
+        <p role="status" className="mb-2 text-xs text-green-600">
+          {notice}
+        </p>
+      )}
 
-          {/* Column 1 - Employee Details */}
-          <section className="min-w-0 rounded-xl border bg-white p-4 dark:bg-slate-900">
+      <form
+        onSubmit={saveFullProfile}
+        className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-7"
+      >
 
-            {/* Employee photo */}
-            <div className="mb-4 flex items-center gap-4 rounded-xl bg-slate-50 p-3 dark:bg-slate-800/50">
-              <Image
-                src="/images/profile-avatar.jpg"
-                alt="Sample employee profile photo"
-                width={80}
-                height={80}
-                className="size-20 shrink-0 rounded-full border-4 border-white object-cover shadow-sm dark:border-slate-700"
-              />
+        {/* LEFT: Photo and employee details */}
+        <section className="min-w-0 space-y-3">
 
-              <div className="min-w-0">
-                <h4 className="truncate text-base font-semibold text-slate-900 dark:text-white">
-                  {profile.first_name} {profile.last_name}
-                </h4>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Profile Image
+          </h3>
 
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  {form.position || "Employee"}
-                </p>
+          <Image
+            src="/images/profile-avatar.jpg"
+            alt="Employee profile photo"
+            width={144}
+            height={144}
+            className="size-36 rounded-xl object-cover"
+          />
 
-                <p className="mt-1 text-xs text-[#6048ce]">
-                  EMP-{String(profile.user_id).padStart(5, "0")}
-                </p>
-              </div>
+          <h3 className="pt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Employee Details
+          </h3>
+
+          <div className="space-y-2">
+            <ProfileField
+              id="first-name"
+              label="First Name"
+              value={form.first_name}
+              required
+              onChange={(value) => updateText("first_name", value)}
+            />
+
+            <ProfileField
+              id="last-name"
+              label="Last Name"
+              value={form.last_name}
+              onChange={(value) => updateText("last_name", value)}
+            />
+
+            <ProfileField
+              id="email"
+              label="Email Address"
+              type="email"
+              value={form.email}
+              required
+              onChange={(value) => updateText("email", value)}
+              onCopy={() => void copyText("Email", form.email)}
+            />
+
+            <ProfileField
+              id="phone"
+              label="Phone Number"
+              type="tel"
+              value={form.phone}
+              onChange={(value) => updateText("phone", value)}
+              onCopy={() => void copyText("Phone number", form.phone)}
+            />
+
+            <ProfileField
+              id="position"
+              label="Position"
+              value={form.position}
+              onChange={(value) => updateText("position", value)}
+            />
+          </div>
+
+          {/* Buttons stay under Employee Details */}
+          <div className="grid grid-cols-2 gap-2 pt-2">
+            <Button
+              type="submit"
+              disabled={saving !== null}
+              className="h-9 bg-[#292d32] text-xs text-white hover:bg-black"
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={saving !== null}
+              onClick={() => {
+                setForm(profileToForm(profile));
+                setError("");
+                setNotice("");
+              }}
+              className="h-9 text-xs"
+            >
+              Cancel
+            </Button>
+          </div>
+        </section>
+
+        {/* MIDDLE: Role and team information */}
+        <section className="min-w-0 space-y-4">
+
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Role
+            </h3>
+
+            <Input
+              value={profile.role === "admin" ? "Administrator" : "Employee"}
+              readOnly
+              aria-label="Role"
+              className="h-9 border-0 bg-[#f8f9fb] text-xs dark:bg-slate-800"
+            />
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Team
+            </h3>
+
+            <ProfileField
+              id="team"
+              label="Team / Department"
+              value={form.team}
+              placeholder="Engineering"
+              onChange={(value) => updateText("team", value)}
+            />
+
+            <ProfileField
+              id="manager"
+              label="Manager"
+              value={form.manager}
+              placeholder="Manager name"
+              onChange={(value) => updateText("manager", value)}
+            />
+
+            <ProfileField
+              id="lead"
+              label="Team Lead"
+              value={form.lead}
+              placeholder="Team lead name"
+              onChange={(value) => updateText("lead", value)}
+            />
+          </div>
+        </section>
+
+        {/* RIGHT: Onboarding */}
+        <section className="min-w-0 space-y-3">
+
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Onboarding
+          </h3>
+
+          <div className="space-y-1">
+            <Label
+              htmlFor="onboarding-start"
+              className="text-[11px] text-slate-500"
+            >
+              Starts On
+            </Label>
+
+            <Input
+              id="onboarding-start"
+              type="date"
+              value={form.onboarding_start}
+              onChange={(e) =>
+                setForm((current) =>
+                  current
+                    ? { ...current, onboarding_start: e.target.value }
+                    : current
+                )
+              }
+              className="h-8 border-0 bg-[#f8f9fb] text-xs dark:bg-slate-800"
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-3 py-1">
+            <Label
+              htmlFor="onboarding-required"
+              className="text-xs"
+            >
+              Onboarding required
+            </Label>
+
+            <Switch
+              id="onboarding-required"
+              checked={form.onboarding_required}
+              onCheckedChange={(checked) =>
+                setForm((current) =>
+                  current
+                    ? { ...current, onboarding_required: checked }
+                    : current
+                )
+              }
+            />
+          </div>
+
+          {/* Read-only progress */}
+          <div className="rounded-lg bg-[#f8f9fb] p-3 dark:bg-slate-800">
+            <p className="mb-2 text-[11px] text-slate-500">
+              Current Status
+            </p>
+
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-green-700 dark:text-green-400">
+                {status}
+              </span>
+
+              <span className="text-xs font-semibold">
+                {progress}%
+              </span>
             </div>
 
-            <div className="mb-4 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/40">
-                <UserIcon
-                  size={20}
-                  className="flex size-5 items-center justify-center text-[#6048ce]"
-                />
-              </div>
-
-              <div>
-                <h3 className="font-semibold leading-6 text-slate-900 dark:text-white">
-                  Employee Details
-                </h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  Personal information
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <ProfileField
-                id="first-name"
-                label="First Name"
-                value={form.first_name}
-                required
-                onChange={(value) => updateText("first_name", value)}
-              />
-
-              <ProfileField
-                id="last-name"
-                label="Last Name"
-                value={form.last_name}
-                onChange={(value) => updateText("last_name", value)}
-              />
-
-              <ProfileField
-                id="email"
-                label="Email Address"
-                type="email"
-                value={form.email}
-                required
-                onChange={(value) => updateText("email", value)}
-              />
-
-              <ProfileField
-                id="phone"
-                label="Phone Number"
-                type="tel"
-                placeholder="+91 9876543210"
-                value={form.phone}
-                onChange={(value) => updateText("phone", value)}
-              />
-
-              <ProfileField
-                id="position"
-                label="Position"
-                placeholder="Software Developer"
-                value={form.position}
-                onChange={(value) => updateText("position", value)}
+            <div
+              role="progressbar"
+              aria-label="Overall onboarding progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+              className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200"
+            >
+              <div
+                className="h-full rounded-full bg-sky-500"
+                style={{ width: `${progress}%` }}
               />
             </div>
-          </section>
+          </div>
 
-          {/* Column 2 - Organization */}
-          <section className="min-w-0 rounded-xl border bg-white p-4 dark:bg-slate-900">
+          <h4 className="pt-1 text-xs font-semibold text-slate-700 dark:text-slate-200">
+            Onboarding Scripts
+          </h4>
 
-            <div className="mb-4 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40">
-                <BriefcaseBusinessIcon
-                  size={20}
-                  className="flex size-5 items-center justify-center text-blue-500"
-                />
-              </div>
-
-              <div>
-                <h3 className="font-semibold leading-6 text-slate-900 dark:text-white">
-                  Organization
-                </h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  Role and team information
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-
-              {/* Role comes from the auth database */}
-              <ProfileField
-                id="role"
-                label="Role"
-                value={ profile.role === "admin" ? "Administrator" : "Employee" }
-                readOnly
-              />
-
-              <p className="-mt-3 text-xs text-slate-400">
-                Only an administrator can change account roles.
-              </p>
-
-              <ProfileField
-                id="team"
-                label="Team / Department"
-                placeholder="Engineering"
-                value={form.team}
-                onChange={(value) => updateText("team", value)}
-              />
-
-              <ProfileField
-                id="manager"
-                label="Manager"
-                placeholder="Manager's name"
-                value={form.manager}
-                onChange={(value) => updateText("manager", value)}
-              />
-
-              <ProfileField
-                id="lead"
-                label="Team Lead"
-                placeholder="Team lead's name"
-                value={form.lead}
-                onChange={(value) => updateText("lead", value)}
-              />
-            </div>
-          </section>
-
-          {/* Column 3 - Onboarding */}
-          <section className="min-w-0 rounded-xl border bg-white p-4 dark:bg-slate-900">
-
-            <div className="mb-4 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-green-50 dark:bg-green-950/40">
-                <ClipboardCheckIcon
-                  size={20}
-                  className="flex size-5 items-center justify-center text-green-500"
-                />
-              </div>
-
-              <div>
-                <h3 className="font-semibold leading-6 text-slate-900 dark:text-white">
-                  Onboarding
-                </h3>
-
-                <p className="mt-1 text-xs text-slate-500">
-                  Employee onboarding progress
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-
-              {/* Start date */}
-              <div className="space-y-2">
-                <Label
-                  htmlFor="onboarding-start"
-                  className="text-xs text-slate-500 dark:text-slate-400"
-                >
-                  Starts On
-                </Label>
-
-                
-                <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center justify-center">
-                    <CalendarDaysIcon
-                      size={18}
-                      className="flex size-[18px] items-center justify-center text-slate-400"
+          <div>
+            {form.tasks.map((task) => (
+              <div
+                key={task.key}
+                className="border-b border-slate-100 py-1.5 last:border-0 dark:border-slate-800"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Switch
+                      checked={task.enabled}
+                      disabled={!form.onboarding_required}
+                      onCheckedChange={(checked) =>
+                        updateTask(task.key, { enabled: checked })
+                      }
+                      aria-label={`Enable ${task.label}`}
+                      className="scale-75"
                     />
+
+                    <span className="text-[11px] leading-tight text-slate-700 dark:text-slate-200">
+                      {task.label}
+                    </span>
                   </div>
 
-                  <Input
-                    id="onboarding-start"
-                    type="date"
-                    value={form.onboarding_start}
-                    onChange={(event) => setForm((current) => current ? { ...current, onboarding_start: event.target.value } : current)}
-                    className="h-11 rounded-xl border-0 bg-[#f8f9fb] pl-10 dark:bg-slate-800"
-                  />
-                </div>
-              </div>
-
-              {/* Onboarding enabled */}
-              <div className="flex items-center justify-between gap-4">
-                <Label
-                  htmlFor="onboarding-required"
-                  className="text-sm font-medium"
-                >
-                  Onboarding required
-                </Label>
-
-                <Switch
-                  id="onboarding-required"
-                  checked={form.onboarding_required}
-                  onCheckedChange={(checked) => setForm((current) => current ? { ...current, onboarding_required: checked } : current)}
-                  className="data-[state=checked]:bg-[#6048ce]"
-                />
-              </div>
-
-              {/* Progress summary */}
-              <div className="rounded-xl bg-[#f8f9fc] p-4 dark:bg-slate-800/60">
-
-                <p className="mb-3 text-xs font-medium text-slate-500">
-                  Current Status
-                </p>
-
-                <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-lg bg-green-50 px-3 py-2 text-xs font-medium text-green-700 dark:bg-green-950/40 dark:text-green-400">
-                    {status}
-                  </span>
-
-                  <span className="text-sm font-semibold text-slate-900 dark:text-white">
-                    {progress}%
+                  <span className="shrink-0 text-[11px] text-slate-500">
+                    {task.progress}%
                   </span>
                 </div>
 
                 <div
                   role="progressbar"
-                  aria-label="Overall onboarding progress"
+                  aria-label={`${task.label} progress`}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  aria-valuenow={progress}
-                  className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
+                  aria-valuenow={task.progress}
+                  className="mt-1 h-1 overflow-hidden rounded-full bg-slate-200"
                 >
                   <div
-                    className="h-full rounded-full bg-[#6048ce] transition-all duration-300"
-                    style={{ width: `${progress}%` }}
+                    className="h-full rounded-full bg-sky-500"
+                    style={{ width: `${task.progress}%` }}
                   />
                 </div>
               </div>
-
-              {/* Onboarding tasks */}
-              <div>
-                <h4 className="mb-4 text-sm font-semibold text-slate-900 dark:text-white">
-                  Onboarding Scripts
-                </h4>
-
-                <div className="space-y-4">
-                  {form.tasks.map((task) => (
-                    <div
-                      key={task.key}
-                      className="border-b border-slate-100 pb-4 last:border-0 dark:border-slate-800"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-
-                        <div className="flex min-w-0 items-center gap-2">
-                          <Switch
-                            checked={task.enabled}
-                            disabled={!form.onboarding_required}
-                            onCheckedChange={(checked) => updateTask(task.key, { enabled: checked })}
-                            aria-label={`Enable ${task.label}`}
-                            className="scale-90 data-[state=checked]:bg-blue-500"
-                          />
-
-                          <span className="text-xs font-medium text-slate-700 dark:text-slate-200">
-                            {task.label}
-                          </span>
-                        </div>
-
-                        <span className="text-xs font-semibold text-slate-500">
-                          {task.progress}%
-                        </span>
-                      </div>
-
-                      <div
-                        role="progressbar"
-                        aria-label={`${task.label} progress`}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={task.progress}
-                        className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
-                      >
-                        <div
-                          className="h-full rounded-full bg-sky-500 transition-all"
-                          style={{
-                            width: `${task.progress}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Partial update */}
-              <Button
-                type="button"
-                variant="outline"
-                disabled={saving !== null}
-                onClick={saveOnboarding}
-                className="w-full rounded-xl dark:border-slate-700"
-              >
-                {saving === "onboarding" ? "Saving Onboarding..." : "Save Onboarding"}
-              </Button>
-            </div>
-          </section>
-        </div>
-
-        {/* Bottom Actions */}
-        <div className="mt-6 flex flex-col-reverse justify-end gap-3 border-t border-slate-200 pt-6 dark:border-slate-800 sm:flex-row">
-
-          <Button
-            type="button"
-            variant="outline"
-            disabled={saving !== null}
-            onClick={() => {
-              setForm(profileToForm(profile));
-              setError("");
-              setNotice("");
-            }}
-            className="h-11 min-w-40 rounded-xl dark:border-slate-700"
-          >
-            Reset Changes
-          </Button>
-
-          <Button
-            type="submit"
-            disabled={saving !== null}
-            className="h-11 min-w-44 rounded-xl bg-[#292d32] text-white hover:bg-black dark:bg-[#6048ce] dark:hover:bg-[#5039b7]"
-          >
-            {saving === "full" ? "Saving Changes..." : "Save Changes"}
-          </Button>
-        </div>
+            ))}
+          </div>
+        </section>
       </form>
     </div>
   );
+
 }
