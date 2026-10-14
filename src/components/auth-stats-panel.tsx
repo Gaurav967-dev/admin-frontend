@@ -58,38 +58,38 @@ export default function AuthStatsPanel() {
     ];
 
     return (
-        <section className="relative flex min-w-0 flex-col justify-center overflow-hidden rounded-2xl bg-[#3155e7] p-5 text-white sm:p-8 lg:rounded-none lg:p-10">
-            <div className="relative z-10">
-                <h2 className="text-2xl font-bold leading-tight sm:text-3xl xl:text-4xl">
+        <section className="flex h-full min-h-0 min-w-0 items-center overflow-hidden bg-[#3155e7] p-3 text-white md:p-6 lg:p-8">
+            <div className="w-full min-h-0">
+                <h2 className="hidden text-2xl font-bold leading-tight md:block lg:text-4xl">
                     Smart tools.
                     <br />
                     Stronger teams.
                 </h2>
 
-                <p className="mt-3 text-sm text-blue-100 sm:text-base">
+                <p className="mt-3 hidden text-sm text-blue-100 md:block">
                     Manage your workspace in one place.
                 </p>
 
-                <div className="mt-6 rounded-2xl bg-white p-4 text-slate-900 shadow-xl sm:p-6 lg:mt-10">
-                    <h3 className="font-semibold">
+                <div className="rounded-xl bg-white p-2 text-slate-900 shadow-lg md:mt-6 md:p-5">
+                    <h3 className="hidden font-semibold md:block">
                         Expinova Dashboard
                     </h3>
 
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 hidden text-xs text-slate-500 md:block">
                         Live user statistics
                     </p>
 
-                    <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
+                    <div className="grid grid-cols-3 gap-1.5 md:mt-5 md:gap-3">
                         {cards.map((card) => (
                             <div
                                 key={card.label}
-                                className="min-w-0 rounded-xl bg-slate-50 p-2 sm:p-4"
+                                className="min-w-0 rounded-lg bg-slate-50 p-2 md:p-3"
                             >
-                                <p className="text-[10px] text-slate-500 sm:text-xs">
+                                <p className="text-[10px] leading-tight text-slate-500 sm:text-xs">
                                     {card.label}
                                 </p>
 
-                                <p className="mt-2 text-xl font-bold sm:text-2xl">
+                                <p className="mt-1 text-lg font-bold md:text-2xl">
                                     {error ? "—" : card.value ?? "..."}
                                 </p>
                             </div>
@@ -97,8 +97,8 @@ export default function AuthStatsPanel() {
                     </div>
 
                     {error && (
-                        <p role="status" className="mt-3 text-xs text-red-500">
-                            Statistics are temporarily unavailable.
+                        <p role="status" className="mt-1 text-xs text-red-500">
+                            Statistics unavailable.
                         </p>
                     )}
                 </div>

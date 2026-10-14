@@ -76,11 +76,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
     }
 
     return (
-        <div className="min-h-dvh bg-[#f7f8fc] p-2 sm:p-4">
-            <div className="mx-auto grid min-h-[calc(100dvh-16px)] max-w-7xl grid-cols-1 overflow-hidden rounded-2xl bg-white sm:min-h-[calc(100dvh-32px)] lg:grid-cols-2">
+        <div className="h-dvh overflow-hidden bg-[#f7f8fc] p-2 sm:p-3">
+            <div className="mx-auto grid h-full min-h-0 max-w-7xl grid-cols-1 grid-rows-[minmax(0,1fr)_136px] overflow-hidden rounded-2xl bg-white md:grid-cols-2 md:grid-rows-1">
 
                 {/* Authentication form */}
-                <div className="flex min-w-0 flex-col px-5 py-6 sm:px-10 lg:px-12 xl:px-16">
+                <div className="flex min-h-0 min-w-0 flex-col overflow-y-auto px-4 py-4 sm:px-7 md:px-6 lg:px-10 xl:px-14">
 
                     <div className="flex items-center gap-3">
                       <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#6048ce] text-white">
@@ -95,9 +95,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
                       </span>
                     </div>
 
-                    <div className="my-auto mx-auto w-full max-w-sm py-12">
+                    <div className="my-auto mx-auto w-full max-w-sm py-3 md:py-4">
 
-                        <div className="mb-8 text-center">
+                        <div className="mb-4 text-center">
                             <h1 className="text-3xl font-bold tracking-tight">
                                 {isSignup ? "Create your account" : "Welcome back"}
                             </h1>
@@ -107,10 +107,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
                             </p>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-5">
+                        <form onSubmit={handleSubmit} className="space-y-3">
 
                             {isSignup && (
-                                <div className="space-y-2">
+                                <div className="space-y-1.5">
                                     <Label htmlFor="name">Full name</Label>
                                     <Input
                                         id="name"
@@ -123,7 +123,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                                 </div>
                             )}
 
-                            <div className="space-y-2">
+                            <div className="space-y-1.5">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
                                     id="email"
@@ -135,7 +135,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                                 />
                             </div>
 
-                            <div className="space-y-2">
+                            <div className="space-y-1.5">
                                 <Label htmlFor="password">Password</Label>
 
                                 <div className="relative">
@@ -161,7 +161,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                             </div>
 
                             {isSignup && (
-                                <div className="space-y-2">
+                                <div className="space-y-1.5">
                                     <Label htmlFor="confirm">Confirm Password</Label>
                                     <Input
                                         id="confirm"
@@ -192,7 +192,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                             </Button>
                         </form>
 
-                        <p className="mt-6 text-center text-sm text-gray-500">
+                        <p className="mt-4 text-center text-sm text-gray-500">
                             {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
 
                             <Link
