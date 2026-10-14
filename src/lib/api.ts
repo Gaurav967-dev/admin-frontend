@@ -70,7 +70,17 @@ export async function apiFetch<T>(
     const refreshed = await getRefreshResult();
 
     if (refreshed) {
+      // Retry original request once.
       response = await makeRequest();
+    }
+
+    // Authentication still failed after refresh.
+    if (response.status === 401) {
+      if (typeof window !== "undefined") {
+        window.location.replace("/");
+      }
+
+      throw new ApiError(401, "Session expired. Please sign in again.");
     }
   }
 
