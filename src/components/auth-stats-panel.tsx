@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { API_URL } from "@/lib/config";
 
 type Stats = {
     total_users: number;
     active_users: number;
     admins: number;
 };
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AuthStatsPanel() {
     const [stats, setStats] = useState<Stats | null>(null);

@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileTextIcon } from "@/components/icons/file-text";
 import AuthStatsPanel from "@/components/auth-stats-panel";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { API_URL } from "@/lib/config";
 
 type AuthFormProps = {
     mode: "signin" | "signup";
