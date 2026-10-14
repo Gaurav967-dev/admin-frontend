@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,7 @@ function ProfileField({ id, label, value, onChange, type = "text", placeholder =
         placeholder={placeholder}
         required={required}
         readOnly={readOnly}
-        className={`h-11 rounded-xl border-transparent bg-[#f8f9fb] px-4 text-sm text-slate-900 shadow-none focus-visible:border-[#6048ce] focus-visible:ring-[#6048ce]/20 dark:bg-slate-800 dark:text-white
+        className={`h-9 rounded-lg border-transparent bg-[#f8f9fb] px-4 text-sm text-slate-900 shadow-none focus-visible:border-[#6048ce] focus-visible:ring-[#6048ce]/20 dark:bg-slate-800 dark:text-white
           ${readOnly ? "cursor-default opacity-70" : ""}
         `}
       />
@@ -258,7 +259,7 @@ export default function ProfilePage() {
     <div className="mx-auto max-w-[1400px]">
 
       {/* Page heading */}
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           
           <Link
@@ -309,12 +310,37 @@ export default function ProfilePage() {
       )}
 
       <form onSubmit={saveFullProfile}>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
 
           {/* Column 1 - Employee Details */}
           <section className="min-w-0 rounded-xl border bg-white p-4 dark:bg-slate-900">
 
-            <div className="mb-7 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
+            {/* Employee photo */}
+            <div className="mb-4 flex items-center gap-4 rounded-xl bg-slate-50 p-3 dark:bg-slate-800/50">
+              <Image
+                src="/images/profile-avatar.jpg"
+                alt="Sample employee profile photo"
+                width={80}
+                height={80}
+                className="size-20 shrink-0 rounded-full border-4 border-white object-cover shadow-sm dark:border-slate-700"
+              />
+
+              <div className="min-w-0">
+                <h4 className="truncate text-base font-semibold text-slate-900 dark:text-white">
+                  {profile.first_name} {profile.last_name}
+                </h4>
+
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  {form.position || "Employee"}
+                </p>
+
+                <p className="mt-1 text-xs text-[#6048ce]">
+                  EMP-{String(profile.user_id).padStart(5, "0")}
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-4 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/40">
                 <UserIcon
                   size={20}
@@ -332,7 +358,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <ProfileField
                 id="first-name"
                 label="First Name"
@@ -379,7 +405,7 @@ export default function ProfilePage() {
           {/* Column 2 - Organization */}
           <section className="min-w-0 rounded-xl border bg-white p-4 dark:bg-slate-900">
 
-            <div className="mb-7 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
+            <div className="mb-4 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40">
                 <BriefcaseBusinessIcon
                   size={20}
@@ -397,7 +423,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
 
               {/* Role comes from the auth database */}
               <ProfileField
@@ -434,39 +460,13 @@ export default function ProfilePage() {
                 value={form.lead}
                 onChange={(value) => updateText("lead", value)}
               />
-
-              <div className="rounded-xl bg-[#f8f9fc] p-4 dark:bg-slate-800/60">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Account Information
-                </p>
-
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  <span className="text-sm text-slate-500">
-                    Account ID
-                  </span>
-
-                  <span className="text-sm font-medium text-slate-900 dark:text-white">
-                    #{profile.user_id}
-                  </span>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between gap-3">
-                  <span className="text-sm text-slate-500">
-                    Account Type
-                  </span>
-
-                  <span className="text-sm font-medium capitalize text-[#6048ce]">
-                    {profile.role}
-                  </span>
-                </div>
-              </div>
             </div>
           </section>
 
           {/* Column 3 - Onboarding */}
           <section className="min-w-0 rounded-xl border bg-white p-4 dark:bg-slate-900">
 
-            <div className="mb-7 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
+            <div className="mb-4 flex items-center gap-3 border-b border-slate-100 pb-5 dark:border-slate-800">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-green-50 dark:bg-green-950/40">
                 <ClipboardCheckIcon
                   size={20}
@@ -485,7 +485,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
 
               {/* Start date */}
               <div className="space-y-2">
