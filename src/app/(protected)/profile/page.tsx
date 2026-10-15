@@ -279,6 +279,31 @@ export default function ProfilePage() {
     }
   }
 
+  const actionButtons = (
+    <>
+      <Button
+        type="submit"
+        disabled={saving !== null}
+        className="h-9 bg-[#292d32] text-white"
+      >
+        {saving ? "Saving..." : "Save Changes"}
+      </Button>
+
+      <Button
+        type="button"
+        variant="secondary"
+        disabled={saving !== null}
+        onClick={() => {
+          setForm(profileToForm(profile));
+          setError("");
+          setNotice("");
+        }}
+        className="h-9"
+      >
+        Cancel
+      </Button>
+    </>
+  );
   
   return (
     <div className="mx-auto w-full max-w-[1150px]">
@@ -383,29 +408,9 @@ export default function ProfilePage() {
             />
           </div>
 
-          {/* Buttons stay under Employee Details */}
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            <Button
-              type="submit"
-              disabled={saving !== null}
-              className="h-9 bg-[#292d32] text-xs text-white hover:bg-black"
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </Button>
-
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={saving !== null}
-              onClick={() => {
-                setForm(profileToForm(profile));
-                setError("");
-                setNotice("");
-              }}
-              className="h-9 text-xs"
-            >
-              Cancel
-            </Button>
+          {/* Desktop buttons */}
+          <div className="hidden grid-cols-2 gap-2 pt-2 lg:grid">
+            {actionButtons}
           </div>
         </section>
 
@@ -575,6 +580,10 @@ export default function ProfilePage() {
             ))}
           </div>
         </section>
+        {/* Mobile and tablet buttons */}
+        <div className="grid grid-cols-2 gap-2 mt-3 md:col-span-2 lg:hidden">
+          {actionButtons}
+        </div>
       </form>
     </div>
   );
