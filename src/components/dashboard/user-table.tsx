@@ -29,8 +29,6 @@ const filters: { label: string; value: Filter }[] = [
 
 type TableResponse = DashboardResponse & Partial<PaginatedUsersResponse>;
 
-const PAGE_SIZE = 5;
-
 export default function UserTable({
   management = false,
 }: {
@@ -38,7 +36,9 @@ export default function UserTable({
 }) {
   const { search } = useDashboardSearch();
   const latestRequestId = useRef(0);
+  const tableRootRef = useRef<HTMLDivElement>(null);
 
+  const [pageSize, setPageSize] = useState(5);
   const [data, setData] = useState<TableResponse | null>(null);
   const [page, setPage] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState(search);
@@ -56,6 +56,39 @@ export default function UserTable({
 
   const [notice, setNotice] = useState("");
 
+  useEffect(() => {
+    const main = tableRootRef.current?.closest("main");
+
+    if (!main) return;
+
+    function updatePageSize() {
+      if (!main) return;
+
+      if (window.innerWidth < 1024) {
+        setPageSize(5);
+        return;
+      }
+
+      const availableHeight = main.clientHeight;
+
+      const nextPageSize = Math.max(3, Math.min(20, Math.floor((availableHeight - 235) / 48)));
+
+      setPageSize(nextPageSize);
+    }
+
+    const observer = new ResizeObserver(updatePageSize);
+
+    observer.observe(main);
+    window.addEventListener("resize", updatePageSize);
+
+    updatePageSize();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updatePageSize);
+    };
+  }, []);
+
   const loadUsers = useCallback(async () => {
     const requestId = ++latestRequestId.current;
 
@@ -68,7 +101,7 @@ export default function UserTable({
       if (management) {
         const params = new URLSearchParams({
           page: String(page),
-          page_size: String(PAGE_SIZE),
+          page_size: String(pageSize),
           search: debouncedSearch,
           status_filter: filter == "active" ? "active" : filter == "inactive" ? "inactive" : "all",
           role_filter: filter === "admins" ? "admin" : "all",
@@ -106,7 +139,7 @@ export default function UserTable({
         setLoading(false);
       }
     }
-  }, [management, page, filter, debouncedSearch]);
+  }, [management, page, filter, debouncedSearch, pageSize]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -122,6 +155,10 @@ export default function UserTable({
   useEffect(() => {
     void loadUsers();
   }, [loadUsers]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [pageSize]);
 
   const filteredUsers = useMemo(() => {
     if (!data) return [];
@@ -139,13 +176,13 @@ export default function UserTable({
     });
   }, [data, management, search, filter]);
 
-  const totalPages = management ? (data?.total_pages ?? 1) : Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const totalPages = management ? (data?.total_pages ?? 1) : Math.max(1, Math.ceil(filteredUsers.length / pageSize));
 
-  const pageRows = management ? filteredUsers : filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pageRows = management ? filteredUsers : filteredUsers.slice((page - 1) * pageSize, page * pageSize);
 
   const totalMatches = management ? (data?.filtered_total ?? 0) : filteredUsers.length;
 
-  const startRow = totalMatches === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const startRow = totalMatches === 0 ? 0 : (page - 1) * pageSize + 1;
 
   const endRow = totalMatches === 0 ? 0 : Math.min(totalMatches, startRow + pageRows.length - 1);
 
@@ -168,19 +205,10 @@ export default function UserTable({
   }
 
   return (
-    <div className="w-full">
+    <div ref={tableRootRef} className="w-full">
 
       {/* Section title */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-            Users
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Manage and review registered users
-          </p>
-        </div>
+      <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
 
         <div className="flex flex-wrap items-center gap-3">
           {management && (
@@ -231,32 +259,8 @@ export default function UserTable({
         </div>
       )}
 
-      {/* Summary */}
-      {data && (
-        <div className="mb-6 flex flex-wrap gap-3">
-          {[
-            { label: "Total Users", value: data.total_users },
-            { label: "Active", value: data.active_users },
-            { label: "Admins", value: data.admins },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/50"
-            >
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {item.label}
-              </p>
-
-              <p className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">
-                {item.value}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Filter tabs */}
-      <div className="mb-5 flex gap-6 overflow-x-auto border-b border-slate-200 dark:border-slate-800">
+      <div className="mb-2 flex gap-4 overflow-x-auto border-b border-slate-200 dark:border-slate-800">
         {filters.map((item) => (
           <button
             key={item.value}
@@ -265,7 +269,7 @@ export default function UserTable({
               setFilter(item.value);
               setPage(1);
             }}
-            className={`shrink-0 border-b-2 px-2 pb-3 pt-2 text-sm font-medium transition-colors
+            className={`shrink-0 border-b-2 px-2 pb-2 pt-1 text-sm font-medium transition-colors
               ${filter === item.value ? "border-[#6048ce] text-[#6048ce]" : "border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white"}
             `}
           >
@@ -308,17 +312,17 @@ export default function UserTable({
       {!loading && !error && data && (
         <>
           <div className="w-full overflow-x-auto">
-            <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left text-sm">
+            <table className="w-full min-w-[760px] border-separate border-spacing-y-1 text-left text-sm">
 
               <thead>
                 <tr className="bg-[#f5f6f8] text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
 
-                  <th className="rounded-l-lg px-5 py-4">User ID</th>
-                  <th className="px-3 py-4">Name</th>
-                  <th className="px-3 py-4">Email</th>
-                  <th className="px-3 py-4">Role</th>
-                  <th className="px-3 py-4">Status</th>
-                  <th className="rounded-r-lg px-3 py-4 text-center">
+                  <th className="rounded-l-lg px-5 py-2">User ID</th>
+                  <th className="px-3 py-2">Name</th>
+                  <th className="px-3 py-2">Email</th>
+                  <th className="px-3 py-2">Role</th>
+                  <th className="px-3 py-2">Status</th>
+                  <th className="rounded-r-lg px-3 py-2 text-center">
                     Action
                   </th>
                 </tr>

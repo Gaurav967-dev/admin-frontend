@@ -279,6 +279,14 @@ export default function ProfilePage() {
     }
   }
 
+  function cancelChanges() {
+    if (!profile) return;
+    
+    setForm(profileToForm(profile));
+    setError("");
+    setNotice("");
+  }
+
   const actionButtons = (
     <>
       <Button
@@ -293,11 +301,7 @@ export default function ProfilePage() {
         type="button"
         variant="secondary"
         disabled={saving !== null}
-        onClick={() => {
-          setForm(profileToForm(profile));
-          setError("");
-          setNotice("");
-        }}
+        onClick={cancelChanges}
         className="h-9"
       >
         Cancel
@@ -309,7 +313,7 @@ export default function ProfilePage() {
     <div className="mx-auto w-full max-w-[1150px]">
 
       {/* Page header */}
-      <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-100 pb-3 dark:border-slate-800">
+      <div className="sticky top-0 z-30 mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-white/95 py-2 backdrop-blur dark:border-slate-800 dark:bg-[#171c28]/95">
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/dashboard"
@@ -327,6 +331,28 @@ export default function ProfilePage() {
         <span className="shrink-0 text-xs text-slate-500">
           EMP-{String(profile.user_id).padStart(5, "0")}
         </span>
+
+        {/* Sticky actions */}
+        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
+          <Button
+            type="submit"
+            form="employee-profile-form"
+            disabled={saving !== null}
+            className="h-8 bg-[#292d32] px-3 text-xs text-white hover:bg-black"
+          >
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
+
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={saving !== null}
+            onClick={cancelChanges}
+            className="h-8 px-3 text-xs"
+          >
+            Cancel
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -342,6 +368,7 @@ export default function ProfilePage() {
       )}
 
       <form
+        id="employee-profile-form"
         onSubmit={saveFullProfile}
         className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-7"
       >
@@ -581,7 +608,7 @@ export default function ProfilePage() {
           </div>
         </section>
         {/* Mobile and tablet buttons */}
-        <div className="grid grid-cols-2 gap-2 mt-3 md:col-span-2 lg:hidden">
+        <div className="mt-3 grid grid-cols-2 gap-2 md:col-span-2 lg:hidden">
           {actionButtons}
         </div>
       </form>
