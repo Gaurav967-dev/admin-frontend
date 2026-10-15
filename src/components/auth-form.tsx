@@ -203,12 +203,18 @@ export default function AuthForm({ mode }: AuthFormProps) {
                         </p>
                     </div>
 
-                    <p className="text-center text-xs text-gray-400">
+                    <p className="hidden text-center text-xs text-gray-400 md:block">
                         © 2026 Expinova. All rights reserved.
                     </p>
                 </div>
 
+                {/* Branding panel */}
                 <AuthStatsPanel />
+
+                {/* Mobile footer - below branding panel */}
+                <footer className="bg-white px-4 py-5 text-center text-xs text-gray-400 md:hidden">
+                    © 2026 Expinova. All rights reserved.
+                </footer>
             </div>
         </div>
     )

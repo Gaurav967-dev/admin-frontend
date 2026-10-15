@@ -57,24 +57,24 @@ export default function AuthStatsPanel() {
     ];
 
     return (
-        <section className="flex min-w-0 items-center bg-[#3155e7] p-4 text-white md:h-full md:min-h-0 md:overflow-hidden md:p-6 lg:p-8">
+        <section className="flex min-h-[320px] min-w-0 items-center bg-[#3155e7] px-4 py-8 text-white sm:px-6 md:h-full md:min-h-0 md:overflow-hidden md:p-6 lg:p-8">
             <div className="w-full min-h-0">
-                <h2 className="hidden text-2xl font-bold leading-tight md:block lg:text-4xl">
+                <h2 className="text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">
                     Smart tools.
                     <br />
                     Stronger teams.
                 </h2>
 
-                <p className="mt-3 hidden text-sm text-blue-100 md:block">
+                <p className="mt-3 text-sm text-blue-100">
                     Manage your workspace in one place.
                 </p>
 
-                <div className="rounded-xl bg-white p-2 text-slate-900 shadow-lg md:mt-6 md:p-5">
-                    <h3 className="hidden font-semibold md:block">
+                <div className="mt-5 rounded-xl bg-white p-3 text-slate-900 shadow-lg md:mt-6 md:p-5">
+                    <h3 className="text-sm font-semibold md:text-base">
                         Expinova Dashboard
                     </h3>
 
-                    <p className="mt-1 hidden text-xs text-slate-500 md:block">
+                    <p className="mt-1 text-xs text-slate-500">
                         Live user statistics
                     </p>
 
