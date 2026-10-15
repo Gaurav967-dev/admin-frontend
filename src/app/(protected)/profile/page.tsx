@@ -12,10 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
 import { ArrowLeftIcon } from "@/components/icons/arrow-left";
-import { BriefcaseBusinessIcon } from "@/components/icons/briefcase-business";
-import { CalendarDaysIcon } from "@/components/icons/calendar-days";
-import { ClipboardCheckIcon } from "@/components/icons/clipboard-check";
-import { UserIcon } from "@/components/icons/user";
 import { Copy } from "lucide-react";
 
 import { apiFetch, ApiError } from "@/lib/api";
