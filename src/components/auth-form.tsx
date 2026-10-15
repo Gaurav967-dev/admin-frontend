@@ -217,5 +217,5 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 </footer>
             </div>
         </div>
-    )
+    );
 }

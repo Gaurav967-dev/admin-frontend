@@ -40,9 +40,15 @@ export default function DashboardShell({
 
             <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 lg:px-6">
               {children}
+
+              {/* Mobile footer */}
+              <footer className="mt-8 border-t border-slate-100 pb-2 pt-4 text-center text-xs text-slate-400 dark:border-slate-800 lg:hidden">
+                © 2026 Expinova. All rights reserved.
+              </footer>
             </main>
 
-            <footer className="shrink-0 border-t border-slate-100 px-4 py-2 text-center text-xs text-slate-400 dark:border-slate-800">
+            {/* Desktop footer */}
+            <footer className="hidden shrink-0 border-t border-slate-100 px-4 py-2 text-center text-xs text-slate-400 dark:border-slate-800 lg:block">
               © 2026 Expinova. All rights reserved.
             </footer>
           </div>
