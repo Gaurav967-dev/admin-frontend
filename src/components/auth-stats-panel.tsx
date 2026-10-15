@@ -57,7 +57,7 @@ export default function AuthStatsPanel() {
     ];
 
     return (
-        <section className="flex h-full min-h-0 min-w-0 items-center overflow-hidden bg-[#3155e7] p-3 text-white md:p-6 lg:p-8">
+        <section className="flex min-w-0 items-center bg-[#3155e7] p-4 text-white md:h-full md:min-h-0 md:overflow-hidden md:p-6 lg:p-8">
             <div className="w-full min-h-0">
                 <h2 className="hidden text-2xl font-bold leading-tight md:block lg:text-4xl">
                     Smart tools.

@@ -75,11 +75,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
     }
 
     return (
-        <div className="h-dvh overflow-hidden bg-[#f7f8fc] p-2 sm:p-3">
-            <div className="mx-auto grid h-full min-h-0 max-w-7xl grid-cols-1 grid-rows-[minmax(0,1fr)_136px] overflow-hidden rounded-2xl bg-white md:grid-cols-2 md:grid-rows-1">
+        <div className="min-h-dvh bg-[#f7f8fc] p-2 sm:p-3 md:h-dvh md:overflow-hidden">
+            <div className="mx-auto grid w-full max-w-7xl grid-cols-1 overflow-hidden rounded-2xl bg-white md:h-full md:min-h-0 md:grid-cols-2 md:grid-rows-1">
 
                 {/* Authentication form */}
-                <div className="flex min-h-0 min-w-0 flex-col overflow-y-auto px-4 py-4 sm:px-7 md:px-6 lg:px-10 xl:px-14">
+                <div className="flex min-w-0 flex-col px-4 py-5 sm:px-7 md:min-h-0 md:overflow-y-auto md:px-6 lg:px-10 xl:px-14">
 
                     <div className="flex items-center gap-3">
                       <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#6048ce] text-white">
