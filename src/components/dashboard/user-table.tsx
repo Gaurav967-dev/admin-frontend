@@ -59,7 +59,7 @@ export default function UserTable({
     const mediaQuery = window.matchMedia("(min-width: 1024px)");
 
     function updatePageSize() {
-      setPageSize(mediaQuery.matches ? 10 : 5);
+      setPageSize(mediaQuery.matches ? 7 : 5);
     }
 
     updatePageSize();
@@ -190,9 +190,27 @@ export default function UserTable({
     <div className="w-full">
 
       {/* Section title */}
-      <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
+      <div className="mb-3 flex flex-col gap-2 border-b border-slate-200 lg:flex-row lg:items-center lg:justify-between dark:border-slate-800">
+        
+        <div className="flex min-w-0 gap-4 overflow-x-auto">
+          {filters.map((item) => (
+            <button
+              key={item.value}
+              type="button"
+              onClick={() => {
+                setFilter(item.value);
+                setPage(1);
+              }}
+              className={`shrink-0 border-b-2 px-2 pb-2 pt-2 text-sm font-medium transition-colors ${
+                filter === item.value ? "border-[#6048ce] text-[#6048ce]" : "border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white"}
+              `}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex shrink-0 items-center justify-end gap-2 pb-1">
           {management && (
             <Button
               type="button"
@@ -202,7 +220,7 @@ export default function UserTable({
               }}
               className="gap-2 bg-[#6048ce] text-white hover:bg-[#5039b7]"
             >
-              <UsersIcon className="size 4" />
+              <UsersIcon className="size-4" />
               Create User
             </Button>
           )}
@@ -212,11 +230,11 @@ export default function UserTable({
             variant="outline"
             onClick={loadUsers}
             disabled={loading}
-            className="inline-flex items-center justify-center gap-2 dark:border-slate-700"
+            className="gap-2 dark:border-slate-700"
           >
             <RefreshCWIcon
               size={18}
-              className={`flex size-[18px] shrink-0 items-center justify-center ${loading ? "animate-spin" : ""}`}
+              className={loading ? "animate-spin" : ""}
             />
             Refresh
           </Button>
@@ -240,25 +258,6 @@ export default function UserTable({
           </button>
         </div>
       )}
-
-      {/* Filter tabs */}
-      <div className="mb-2 flex gap-4 overflow-x-auto border-b border-slate-200 dark:border-slate-800">
-        {filters.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            onClick={() => {
-              setFilter(item.value);
-              setPage(1);
-            }}
-            className={`shrink-0 border-b-2 px-2 pb-2 pt-1 text-sm font-medium transition-colors
-              ${filter === item.value ? "border-[#6048ce] text-[#6048ce]" : "border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white"}
-            `}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
 
       {/* Loading */}
       {loading && (
