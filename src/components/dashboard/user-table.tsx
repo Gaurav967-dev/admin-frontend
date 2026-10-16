@@ -59,7 +59,7 @@ export default function UserTable({
     const mediaQuery = window.matchMedia("(min-width: 1024px)");
 
     function updatePageSize() {
-      setPageSize(mediaQuery.matches ? 7 : 5);
+      setPageSize(mediaQuery.matches ? 10 : 5);
     }
 
     updatePageSize();
