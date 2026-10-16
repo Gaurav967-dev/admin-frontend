@@ -36,7 +36,7 @@ export default function UserTable({
 }) {
   const { search } = useDashboardSearch();
   const latestRequestId = useRef(0);
-  const [pageSize, setPageSize] = useState(10);
+  const PAGE_SIZE = 10;
   
   const [data, setData] = useState<TableResponse | null>(null);
   const [page, setPage] = useState(1);
@@ -55,22 +55,6 @@ export default function UserTable({
 
   const [notice, setNotice] = useState("");
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 1024px)");
-
-    function updatePageSize() {
-      setPageSize(mediaQuery.matches ? 10 : 5);
-    }
-
-    updatePageSize();
-
-    mediaQuery.addEventListener("change", updatePageSize);
-
-    return () => {
-      mediaQuery.removeEventListener("change", updatePageSize);
-    };
-  }, []);
-
   const loadUsers = useCallback(async () => {
     const requestId = ++latestRequestId.current;
 
@@ -83,7 +67,7 @@ export default function UserTable({
       if (management) {
         const params = new URLSearchParams({
           page: String(page),
-          page_size: String(pageSize),
+          page_size: String(PAGE_SIZE),
           search: debouncedSearch,
           status_filter: filter == "active" ? "active" : filter == "inactive" ? "inactive" : "all",
           role_filter: filter === "admins" ? "admin" : "all",
@@ -121,7 +105,7 @@ export default function UserTable({
         setLoading(false);
       }
     }
-  }, [management, page, filter, debouncedSearch, pageSize]);
+  }, [management, page, filter, debouncedSearch]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -137,10 +121,6 @@ export default function UserTable({
   useEffect(() => {
     void loadUsers();
   }, [loadUsers]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [pageSize]);
 
   const filteredUsers = useMemo(() => {
     if (!data) return [];
@@ -158,13 +138,13 @@ export default function UserTable({
     });
   }, [data, management, search, filter]);
 
-  const totalPages = management ? (data?.total_pages ?? 1) : Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const totalPages = management ? (data?.total_pages ?? 1) : Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
 
-  const pageRows = management ? filteredUsers : filteredUsers.slice((page - 1) * pageSize, page * pageSize);
+  const pageRows = management ? filteredUsers : filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const totalMatches = management ? (data?.filtered_total ?? 0) : filteredUsers.length;
 
-  const startRow = totalMatches === 0 ? 0 : (page - 1) * pageSize + 1;
+  const startRow = totalMatches === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
 
   const endRow = totalMatches === 0 ? 0 : Math.min(totalMatches, startRow + pageRows.length - 1);
 
@@ -189,10 +169,34 @@ export default function UserTable({
   return (
     <div className="w-full">
 
-      {/* Section title */}
-      <div className="mb-3 flex flex-col gap-2 border-b border-slate-200 lg:flex-row lg:items-center lg:justify-between dark:border-slate-800">
+      {/* Responsive filters, actions toolbar */}
+      <div className="mb-2 flex min-w-0 items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800">
+
+        {/* Mobile: filter dropdown */}
+        <div className="min-w-0 md:hidden">
+          <label htmlFor="mobile-user-filter" className="sr-only">
+            Filter users
+          </label>
+
+          <select
+            id="mobile-user-filter"
+            value={filter}
+            onChange={(e) => {
+              setFilter(e.target.value as Filter);
+              setPage(1);
+            }}
+            className="h-9 w-[95px] rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-700 outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+          >
+            {filters.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </div>
         
-        <div className="flex min-w-0 gap-4 overflow-x-auto">
+        {/* Desktop, tablet: filter tabs */}
+        <div className="hidden min-w-0 items-center gap-3 md:flex">
           {filters.map((item) => (
             <button
               key={item.value}
@@ -201,7 +205,7 @@ export default function UserTable({
                 setFilter(item.value);
                 setPage(1);
               }}
-              className={`shrink-0 border-b-2 px-2 pb-2 pt-2 text-sm font-medium transition-colors ${
+              className={`shrink-0 border-b-2 px-2 py-2 text-sm font-medium transition-colors ${
                 filter === item.value ? "border-[#6048ce] text-[#6048ce]" : "border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-white"}
               `}
             >
@@ -210,7 +214,8 @@ export default function UserTable({
           ))}
         </div>
 
-        <div className="flex shrink-0 items-center justify-end gap-2 pb-1">
+        {/* Action buttons */}
+        <div className="flex shrink-0 items-center gap-1.5 pb-1">
           {management && (
             <Button
               type="button"
@@ -218,9 +223,9 @@ export default function UserTable({
                 setEditingUser(null);
                 setFormOpen(true);
               }}
-              className="gap-2 bg-[#6048ce] text-white hover:bg-[#5039b7]"
+              className="h-9 gap-1 bg-[#6048ce] px-2 text-xs text-white hover:bg-[#5039b7] sm:px-3 sm:text-sm"
             >
-              <UsersIcon className="size-4" />
+              <UsersIcon className="size-3.5 shrink-0" />
               Create User
             </Button>
           )}
@@ -230,13 +235,17 @@ export default function UserTable({
             variant="outline"
             onClick={loadUsers}
             disabled={loading}
-            className="gap-2 dark:border-slate-700"
+            aria-label="Refresh users"
+            title="Refresh Users"
+            className="h-9 gap-1 px-2 dark:border-slate-700 sm:px-3"
           >
             <RefreshCWIcon
-              size={18}
+              size={16}
               className={loading ? "animate-spin" : ""}
             />
-            Refresh
+            <span className="hidden sm:inline">
+              Refresh
+            </span>
           </Button>
         </div>
       </div>
