@@ -27,6 +27,7 @@ export type ProfileData = {
 
     onboarding_progress: number;
     onboarding_status: string;
+    created_at: string | null;
 };
 
 export type ProfileFormValues = {

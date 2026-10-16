@@ -280,11 +280,7 @@ export default function ProfilePage() {
   }
 
   function cancelChanges() {
-    if (!profile) return;
-    
-    setForm(profileToForm(profile));
-    setError("");
-    setNotice("");
+    router.push("/dashboard");
   }
 
   const actionButtons = (
@@ -308,6 +304,14 @@ export default function ProfilePage() {
       </Button>
     </>
   );
+
+  const addedOn = profile.created_at ? new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  })
+    .format(new Date(profile.created_at)).replaceAll("/", ".") : "Unavailable";
   
   return (
     <div className="mx-auto w-full max-w-[1150px]">
@@ -325,21 +329,27 @@ export default function ProfilePage() {
             <ArrowLeftIcon size={18} />
           </Link>
 
+          <Image
+            src="/images/profile-avatar.jpg"
+            alt={`${profile.first_name} ${profile.last_name}`}
+            width={40}
+            height={40}
+            className="size-9 shrink-0 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-700"
+          />
+
           <div className="min-w-0">
             <h2 className="truncate text-base font-semibold text-slate-900 dark:text-white sm:text-xl">
               {profile.first_name} {profile.last_name}
             </h2>
 
-            {/* Employee id on mobile */}
-            <p className="text-[10px] text-slate-500 sm:hidden">
-              EMP-{String(profile.user_id).padStart(5, "0")}
+            <p className="truncate text-[10px] text-slate-500 lg:hidden">
+              Added on {addedOn}
             </p>
           </div>
         </div>
 
-        {/* Employee id on large screen */}
-        <span className="hidden shrink-0 text-xs text-slate-500 sm:inline">
-          EMP-{String(profile.user_id).padStart(5, "0")}
+        <span className="hidden shrink-0 text-xs text-slate-500 lg:inline">
+          Added on {addedOn}
         </span>
 
         {/* Right: sticky save, cancel */}
