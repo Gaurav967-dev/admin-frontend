@@ -81,7 +81,7 @@ export default function Header({
 
           <ThemeToggle />
 
-          <div className="w-14 min-w-0 text-right sm:w-auto sm:border-1 sm:border-slate-200 sm:pl-3 sm:text-left dark:sm:border-slate-700">
+          <div className="w-14 min-w-0 text-right sm:w-auto sm:border-slate-200 sm:pl-3 sm:text-left dark:sm:border-slate-700">
             <p className="truncate text-[11px] font-semibold text-slate-800 dark:text-white sm:max-w-28 sm:text-sm">
               {user.name}
             </p>

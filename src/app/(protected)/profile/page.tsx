@@ -313,34 +313,51 @@ export default function ProfilePage() {
     <div className="mx-auto w-full max-w-[1150px]">
 
       {/* Page header */}
-      <div className="sticky top-0 z-30 mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-white/95 py-2 backdrop-blur dark:border-slate-800 dark:bg-[#171c28]/95">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="sticky top-0 z-30 mb-3 flex flex-nowrap items-center gap-2 border-b border-slate-100 bg-white/95 py-2 backdrop-blur dark:border-slate-800 dark:bg-[#171c28]/95">
+        
+        {/* Left: back button, employee name */}
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <Link
             href="/dashboard"
             aria-label="Back to dashboard"
-            className="text-slate-600 hover:text-[#6048ce]"
+            className="shrink-0 text-slate-600 hover:text-[#6048ce]"
           >
-            <ArrowLeftIcon size={19} />
+            <ArrowLeftIcon size={18} />
           </Link>
 
-          <h2 className="truncate text-xl font-semibold text-slate-900 dark:text-white">
-            {profile.first_name} {profile.last_name}
-          </h2>
+          <div className="min-w-0">
+            <h2 className="truncate text-base font-semibold text-slate-900 dark:text-white sm:text-xl">
+              {profile.first_name} {profile.last_name}
+            </h2>
+
+            {/* Employee id on mobile */}
+            <p className="text-[10px] text-slate-500 sm:hidden">
+              EMP-{String(profile.user_id).padStart(5, "0")}
+            </p>
+          </div>
         </div>
 
-        <span className="shrink-0 text-xs text-slate-500">
+        {/* Employee id on large screen */}
+        <span className="hidden shrink-0 text-xs text-slate-500 sm:inline">
           EMP-{String(profile.user_id).padStart(5, "0")}
         </span>
 
-        {/* Sticky actions */}
-        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
+        {/* Right: sticky save, cancel */}
+        <div className="ml-auto flex shrink-0 flex-nowrap items-center gap-1 sm:gap-2">
           <Button
             type="submit"
             form="employee-profile-form"
+            aria-label="Save Changes"
             disabled={saving !== null}
-            className="h-8 bg-[#292d32] px-3 text-xs text-white hover:bg-black"
+            className="h-8 shrink-0 bg-[#292d32] px-2 text-[11px] text-white hover:bg-black sm:px-3 sm:text-xs"
           >
-            {saving ? "Saving..." : "Save Changes"}
+            <span className="sm:hidden">
+              {saving ? "Saving" : "Save"}
+            </span>
+
+            <span className="hidden sm:inline">
+              {saving ? "Saving..." : "Save Changes"}
+            </span>
           </Button>
 
           <Button
@@ -348,7 +365,7 @@ export default function ProfilePage() {
             variant="secondary"
             disabled={saving !== null}
             onClick={cancelChanges}
-            className="h-8 px-3 text-xs"
+            className="h-8 shrink-0 px-2 text-[11px] sm:px-3 sm:text-xs"
           >
             Cancel
           </Button>
