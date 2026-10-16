@@ -293,7 +293,7 @@ export default function UserTable({
       {!loading && !error && data && (
         <>
           <div className="w-full overflow-x-auto">
-            <table className="w-full min-w-[760px] whitespace-nowrap border-separate border-spacing-y-1 text-left text-sm">
+            <table className="w-full min-w-[760px] whitespace-nowrap border-separate border-spacing-y-1 lg:border-spacing-y-0 text-left text-sm">
 
               <thead>
                 <tr className="bg-[#f5f6f8] text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
@@ -315,19 +315,19 @@ export default function UserTable({
                     key={user.id}
                     className="bg-white text-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors hover:bg-slate-50 dark:bg-slate-800/40 dark:text-slate-200 dark:hover:bg-slate-800"
                   >
-                    <td className="rounded-l-lg border-y border-l border-slate-100 px-5 py-1 font-medium dark:border-slate-700">
+                    <td className="rounded-l-lg border-y border-l border-slate-100 px-5 py-1 lg:py-0 font-medium dark:border-slate-700">
                       IN-{String(user.id).padStart(5, "0")}
                     </td>
 
-                    <td className="border-y border-slate-100 px-3 py-1 font-medium text-slate-900 dark:border-slate-700 dark:text-white">
+                    <td className="border-y border-slate-100 px-3 py-1 lg:py-0 font-medium text-slate-900 dark:border-slate-700 dark:text-white">
                       {user.name}
                     </td>
 
-                    <td className="border-y border-slate-100 px-3 py-1 text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                    <td className="border-y border-slate-100 px-3 py-1 lg:py-0 text-slate-500 dark:border-slate-700 dark:text-slate-400">
                       {user.email}
                     </td>
 
-                    <td className="border-y border-slate-100 px-3 py-1 dark:border-slate-700">
+                    <td className="border-y border-slate-100 px-3 py-1 lg:py-0 dark:border-slate-700">
                       <Badge
                         variant="secondary"
                         className={
@@ -338,7 +338,7 @@ export default function UserTable({
                       </Badge>
                     </td>
 
-                    <td className="border-y border-slate-100 px-3 py-1 dark:border-slate-700">
+                    <td className="border-y border-slate-100 px-3 py-1 lg:py-0 dark:border-slate-700">
                       <Badge
                         className={
                           user.is_active ? "border-0 bg-green-50 text-green-600 hover:bg-green-50 dark:bg-green-900/30 dark:text-green-400" : "border-0 bg-red-50 text-red-600 hover:bg-red-50 dark:bg-red-900/30 dark:text-red-400"
@@ -349,7 +349,7 @@ export default function UserTable({
                     </td>
 
                     
-                    <td className="rounded-r-lg border-y border-r border-slate-100 px-3 py-1 dark:border-slate-700">
+                    <td className="rounded-r-lg border-y border-r border-slate-100 px-3 py-1 lg:py-0 dark:border-slate-700">
                       <div className="flex items-center justify-center gap-1">
                         
                         {/* View User */}

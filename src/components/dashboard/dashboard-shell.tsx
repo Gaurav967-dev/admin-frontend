@@ -38,7 +38,7 @@ export default function DashboardShell({
               />
             </div>
 
-            <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 lg:px-6">
+            <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 lg:px-6 lg:py-2">
               {children}
 
               {/* Mobile footer */}

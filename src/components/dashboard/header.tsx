@@ -27,7 +27,7 @@ export default function Header({
 
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-[#171c28]/95">
-      <div className="flex min-h-15 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+      <div className="flex min-h-20 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
 
         {/* Left */}
         <div className="flex shrink-0 items-center gap-3">
