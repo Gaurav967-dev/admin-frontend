@@ -36,9 +36,8 @@ export default function UserTable({
 }) {
   const { search } = useDashboardSearch();
   const latestRequestId = useRef(0);
-  const tableRootRef = useRef<HTMLDivElement>(null);
-
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
+  
   const [data, setData] = useState<TableResponse | null>(null);
   const [page, setPage] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState(search);
@@ -57,35 +56,18 @@ export default function UserTable({
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
-    const main = tableRootRef.current?.closest("main");
-
-    if (!main) return;
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
 
     function updatePageSize() {
-      if (!main) return;
-
-      if (window.innerWidth < 1024) {
-        setPageSize(5);
-        return;
-      }
-
-      const availableHeight = main.clientHeight;
-
-      const nextPageSize = Math.max(3, Math.min(20, Math.floor((availableHeight - 235) / 48)));
-
-      setPageSize(nextPageSize);
+      setPageSize(mediaQuery.matches ? 10 : 5);
     }
-
-    const observer = new ResizeObserver(updatePageSize);
-
-    observer.observe(main);
-    window.addEventListener("resize", updatePageSize);
 
     updatePageSize();
 
+    mediaQuery.addEventListener("change", updatePageSize);
+
     return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", updatePageSize);
+      mediaQuery.removeEventListener("change", updatePageSize);
     };
   }, []);
 
@@ -205,7 +187,7 @@ export default function UserTable({
   }
 
   return (
-    <div ref={tableRootRef} className="w-full">
+    <div className="w-full">
 
       {/* Section title */}
       <div className="mb-3 flex flex-wrap items-center justify-end gap-2">
@@ -312,7 +294,7 @@ export default function UserTable({
       {!loading && !error && data && (
         <>
           <div className="w-full overflow-x-auto">
-            <table className="w-full min-w-[760px] border-separate border-spacing-y-1 text-left text-sm">
+            <table className="w-full min-w-[760px] whitespace-nowrap border-separate border-spacing-y-1 text-left text-sm">
 
               <thead>
                 <tr className="bg-[#f5f6f8] text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
@@ -334,19 +316,19 @@ export default function UserTable({
                     key={user.id}
                     className="bg-white text-slate-700 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors hover:bg-slate-50 dark:bg-slate-800/40 dark:text-slate-200 dark:hover:bg-slate-800"
                   >
-                    <td className="rounded-l-lg border-y border-l border-slate-100 px-5 py-4 font-medium dark:border-slate-700">
+                    <td className="rounded-l-lg border-y border-l border-slate-100 px-5 py-1 font-medium dark:border-slate-700">
                       IN-{String(user.id).padStart(5, "0")}
                     </td>
 
-                    <td className="border-y border-slate-100 px-3 py-4 font-medium text-slate-900 dark:border-slate-700 dark:text-white">
+                    <td className="border-y border-slate-100 px-3 py-1 font-medium text-slate-900 dark:border-slate-700 dark:text-white">
                       {user.name}
                     </td>
 
-                    <td className="border-y border-slate-100 px-3 py-4 text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                    <td className="border-y border-slate-100 px-3 py-1 text-slate-500 dark:border-slate-700 dark:text-slate-400">
                       {user.email}
                     </td>
 
-                    <td className="border-y border-slate-100 px-3 py-4 dark:border-slate-700">
+                    <td className="border-y border-slate-100 px-3 py-1 dark:border-slate-700">
                       <Badge
                         variant="secondary"
                         className={
@@ -357,7 +339,7 @@ export default function UserTable({
                       </Badge>
                     </td>
 
-                    <td className="border-y border-slate-100 px-3 py-4 dark:border-slate-700">
+                    <td className="border-y border-slate-100 px-3 py-1 dark:border-slate-700">
                       <Badge
                         className={
                           user.is_active ? "border-0 bg-green-50 text-green-600 hover:bg-green-50 dark:bg-green-900/30 dark:text-green-400" : "border-0 bg-red-50 text-red-600 hover:bg-red-50 dark:bg-red-900/30 dark:text-red-400"
@@ -368,7 +350,7 @@ export default function UserTable({
                     </td>
 
                     
-                    <td className="rounded-r-lg border-y border-r border-slate-100 px-3 py-4 dark:border-slate-700">
+                    <td className="rounded-r-lg border-y border-r border-slate-100 px-3 py-1 dark:border-slate-700">
                       <div className="flex items-center justify-center gap-1">
                         
                         {/* View User */}
@@ -435,7 +417,7 @@ export default function UserTable({
             </div>
           )}
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2 dark:border-slate-800">
 
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Showing {startRow}-{endRow} of {totalMatches} users
