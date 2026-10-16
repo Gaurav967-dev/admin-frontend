@@ -73,7 +73,11 @@ export default function Header({
         )}
 
         {/* Right: theme toggle, user info */}
-        <div className="col-start-2 row-start-1 flex shrink-0 items-center gap-1 sm:order-3 sm:gap-2">
+        <div
+          className={`col-start-2 row-start-1 flex shrink-0 items-center gap-1 sm:order-3 sm:gap-2 ${
+            pathname === "/profile" ? "sm:ml-auto" : ""}
+          `}
+        >
 
           <ThemeToggle />
 
