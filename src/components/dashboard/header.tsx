@@ -43,7 +43,7 @@ export default function Header({
             />
           </button>
 
-          <h1 className="min-w-0 truncate text-base font-semibold text-slate-900 dark:text-white sm:text-2xl">
+          <h1 className="min-w-0 truncate text-sm font-semibold text-slate-900 dark:text-white sm:text-xl lg:text-2xl">
             {title}
           </h1>
         </div>
@@ -73,16 +73,16 @@ export default function Header({
         )}
 
         {/* Right: theme toggle, user info */}
-        <div className="col-start-2 row-start-1 flex shrink-0 items-center gap-2 sm:order-3">
+        <div className="col-start-2 row-start-1 flex shrink-0 items-center gap-1 sm:order-3 sm:gap-2">
 
           <ThemeToggle />
 
-          <div className="hidden border-l border-slate-200 pl-4 dark:border-slate-700 md:block">
-            <p className="max-w-28 truncate text-sm font-semibold text-slate-800 dark:text-white">
+          <div className="w-14 min-w-0 text-right sm:w-auto sm:border-1 sm:border-slate-200 sm:pl-3 sm:text-left dark:sm:border-slate-700">
+            <p className="truncate text-[11px] font-semibold text-slate-800 dark:text-white sm:max-w-28 sm:text-sm">
               {user.name}
             </p>
 
-            <p className="text-xs capitalize text-slate-500 dark:text-slate-400">
+            <p className="truncate text-[10px] capitalize text-slate-500 dark:text-slate-400 sm:text-xs">
               {user.role}
             </p>
           </div>
