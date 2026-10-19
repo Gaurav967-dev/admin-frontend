@@ -180,51 +180,6 @@ export default function ProfilePage() {
     }
   }
 
-  // PATCH /profile
-
-  async function saveOnboarding() {
-    if (!form || saving) return;
-
-    setError("");
-    setNotice("");
-
-    try {
-      // Only onboarding fields are updated.
-      const result = await apiFetch<ProfileSaveResponse>(
-        "/profile",
-        {
-          method: "PATCH",
-          body: JSON.stringify({
-            onboarding_start: form.onboarding_start || null,
-            onboarding_required: form.onboarding_required,
-            tasks: profileToPayload(form).tasks,
-          }),
-        }
-      );
-
-      setProfile(result.profile);
-
-      // Preserve unsaved edits in employee details.
-      setForm((current) =>
-        current
-          ? {
-              ...current,
-              onboarding_start: result.profile.onboarding_start ?? "",
-              onboarding_required: result.profile.onboarding_required,
-              tasks: result.profile.tasks,
-            }
-          : current
-      );
-
-      setNotice("Onboarding updated successfully");
-
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to save onboarding");
-    } finally {
-      setSaving(null);
-    }
-  }
-
   // Page states
 
   if (loading) {
