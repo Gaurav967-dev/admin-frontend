@@ -148,7 +148,7 @@ export default function ProfilePage() {
   {
     event.preventDefault();
 
-    if (!form || saving) return;
+    if (!form || !profile || saving) return;
 
     setError("");
     setNotice("");
@@ -158,6 +158,15 @@ export default function ProfilePage() {
       return;
     }
 
+    const addingPhone = !profile.phone?.trim() && Boolean(form.phone.trim());
+
+    if (addingPhone && !/^\+?[1-9]\d{6,14}$/.test(form.phone.trim())) {
+      setError("Enter 7-15 digits, optionally starting with +");
+      return;
+    }
+
+    const payload = {...profileToPayload(form), ...(addingPhone ? { phone: form.phone.trim() } : {})};
+
     setSaving("full");
 
     try {
@@ -165,7 +174,7 @@ export default function ProfilePage() {
         "/profile",
         {
           method: "PUT",
-          body: JSON.stringify(profileToPayload(form)),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -214,6 +223,8 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  const phoneLocked = Boolean(profile.phone?.trim());
 
   const progress = calculateProgress(form);
   const hasEnabledTasks = form.tasks.some(
@@ -403,10 +414,18 @@ export default function ProfilePage() {
               id="phone"
               label="Phone Number"
               type="tel"
-              value={profile.phone ?? ""}
-              readOnly
-              onCopy={() => void copyText("Phone number", profile.phone ?? "")}
+              value={phoneLocked ? (profile.phone ?? "") : form.phone}
+              placeholder={phoneLocked ? "" : "+919876543210"}
+              readOnly={phoneLocked}
+              onChange={phoneLocked ? undefined : (value) => updateText("phone", value)}
+              onCopy={() => void copyText("Phone number", phoneLocked ? (profile.phone ?? "") : form.phone)}
             />
+
+            {!phoneLocked && (
+              <p className="text-[11px] text-slate-500">
+                You can add your phone number once. After saving, it cannot be changed from your profile.
+              </p>
+            )}
 
             <ProfileField
               id="position"
