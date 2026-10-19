@@ -180,7 +180,7 @@ export default function ProfilePage() {
 
       setProfile(result.profile);
       setForm(profileToForm(result.profile));
-      setNotice(result.message);
+      setNotice(addingPhone ? "Phone Number Added Successfully" : result.message);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to save your profile");
