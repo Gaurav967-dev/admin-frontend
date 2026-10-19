@@ -394,19 +394,18 @@ export default function ProfilePage() {
               id="email"
               label="Email Address"
               type="email"
-              value={form.email}
-              required
-              onChange={(value) => updateText("email", value)}
-              onCopy={() => void copyText("Email", form.email)}
+              value={profile.email}
+              readOnly
+              onCopy={() => void copyText("Email", profile.email)}
             />
 
             <ProfileField
               id="phone"
               label="Phone Number"
               type="tel"
-              value={form.phone}
-              onChange={(value) => updateText("phone", value)}
-              onCopy={() => void copyText("Phone number", form.phone)}
+              value={profile.phone ?? ""}
+              readOnly
+              onCopy={() => void copyText("Phone number", profile.phone ?? "")}
             />
 
             <ProfileField

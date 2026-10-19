@@ -30,9 +30,7 @@ export function profileToPayload(
   return {
     first_name: form.first_name.trim(),
     last_name: form.last_name.trim(),
-    email: form.email.trim().toLowerCase(),
 
-    phone: optional(form.phone),
     position: optional(form.position),
     team: optional(form.team),
     manager: optional(form.manager),
