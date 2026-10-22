@@ -283,7 +283,7 @@ export default function ProfilePage() {
     <div className="mx-auto w-full max-w-[1150px]">
 
       {/* Page header */}
-      <div className="sticky top-0 z-30 mb-3 flex flex-nowrap items-center gap-2 border-b border-slate-100 bg-white/95 py-2 backdrop-blur dark:border-slate-800 dark:bg-[#171c28]/95">
+      <div className="sticky top-0 z-40 mb-3 flex flex-nowrap items-center gap-2 border-b border-slate-100 bg-white py-2 shadow-sm dark:border-slate-800 dark:bg-[#171c28]">
 
         {/* Left: back button, employee name */}
         <div className="flex min-w-0 flex-1 items-center gap-2">

@@ -36,7 +36,8 @@ export default function UserTable({
 }) {
   const { search } = useDashboardSearch();
   const latestRequestId = useRef(0);
-  const PAGE_SIZE = 12;
+  const [pageSize, setPageSize] = useState(12);
+  const [pageInput, setPageInput] = useState("1");
   
   const [data, setData] = useState<TableResponse | null>(null);
   const [page, setPage] = useState(1);
@@ -67,7 +68,7 @@ export default function UserTable({
       if (management) {
         const params = new URLSearchParams({
           page: String(page),
-          page_size: String(PAGE_SIZE),
+          page_size: String(pageSize),
           search: debouncedSearch,
           status_filter: filter == "active" ? "active" : filter == "inactive" ? "inactive" : "all",
           role_filter: filter === "admins" ? "admin" : "all",
@@ -105,7 +106,7 @@ export default function UserTable({
         setLoading(false);
       }
     }
-  }, [management, page, filter, debouncedSearch]);
+  }, [management, page, filter, debouncedSearch, pageSize]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -121,6 +122,10 @@ export default function UserTable({
   useEffect(() => {
     void loadUsers();
   }, [loadUsers]);
+
+  useEffect(() => {
+    setPageInput(String(page));
+  }, [page]);
 
   const filteredUsers = useMemo(() => {
     if (!data) return [];
@@ -138,13 +143,13 @@ export default function UserTable({
     });
   }, [data, management, search, filter]);
 
-  const totalPages = management ? (data?.total_pages ?? 1) : Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const totalPages = management ? (data?.total_pages ?? 1) : Math.max(1, Math.ceil(filteredUsers.length / pageSize));
 
-  const pageRows = management ? filteredUsers : filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pageRows = management ? filteredUsers : filteredUsers.slice((page - 1) * pageSize, page * pageSize);
 
   const totalMatches = management ? (data?.filtered_total ?? 0) : filteredUsers.length;
 
-  const startRow = totalMatches === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const startRow = totalMatches === 0 ? 0 : (page - 1) * pageSize + 1;
 
   const endRow = totalMatches === 0 ? 0 : Math.min(totalMatches, startRow + pageRows.length - 1);
 
@@ -164,6 +169,24 @@ export default function UserTable({
     } else {
       void loadUsers();
     }
+  }
+
+  function goToPage() {
+    const requestedPage = Number(pageInput);
+
+    if (!Number.isInteger(requestedPage) || requestedPage < 1 || requestedPage > totalPages) {
+      setPageInput(String(page));
+      return;
+    }
+
+    setPage(requestedPage);
+    setPageInput(String(requestedPage));
+  }
+
+  function changePageSize(value: number) {
+    setPageSize(value);
+    setPage(1);
+    setPageInput("1");
   }
 
   return (
@@ -425,13 +448,42 @@ export default function UserTable({
             </div>
           )}
 
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2 dark:border-slate-800">
+          {/* Table pagination */}
+          <div className="mt-2 flex flex-col gap-3 border-t border-slate-100 pt-3 dark:border-slate-800 xl:flex-row xl:items-center xl:justify-between">
 
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Showing {startRow}-{endRow} of {totalMatches} users
-            </p>
+            {/* Count and rows dropdown */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
 
-            <div className="flex items-center gap-2">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Showing {startRow}-{endRow} of {totalMatches} users
+              </p>
+
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="rows-per-page"
+                  className="text-xs text-slate-600 dark:text-slate-300"
+                >
+                  Rows per page
+                </label>
+
+                <select
+                  id="rows-per-page"
+                  value={pageSize}
+                  onChange={(e) => changePageSize(Number(e.target.value))}
+                  className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700 outline-none focus:border-[#6048ce] dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                >
+                  {[12, 20, 30, 40, 50].map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Page navigation */}
+            <div className="flex flex-wrap items-center gap-2">
+
               <Button
                 type="button"
                 variant="outline"
@@ -442,9 +494,42 @@ export default function UserTable({
                 Previous
               </Button>
 
-              <span className="min-w-20 text-center text-xs text-slate-600 dark:text-slate-300">
+              <span className="whitespace-nowrap text-xs text-slate-600 dark:text-slate-300">
                 Page {page} of {totalPages}
               </span>
+
+              <label htmlFor="go-to-page" className="sr-only">
+                Enter page number
+              </label>
+
+              <input
+                id="go-to-page"
+                type="number"
+                min={1}
+                max={totalPages}
+                step={1}
+                inputMode="numeric"
+                aria-label="Go to page number"
+                value={pageInput}
+                onChange={(e) => setPageInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    goToPage();
+                  }
+                }}
+                className="h-8 w-14 rounded-md border border-slate-200 bg-white px-2 text-center text-xs text-slate-800 outline-none focus:border-[#6048ce] dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              />
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={loading}
+                onClick={goToPage}
+              >
+                Go
+              </Button>
 
               <Button
                 type="button"

@@ -5,6 +5,7 @@ import { useState, type ReactNode } from "react";
 import Sidebar from "./sidebar";
 import Header from "./header";
 import { SearchProvider } from "./search-context";
+import { usePathname } from "next/navigation"
 
 import type { AuthenticatedUser } from "@/types/dashboard";
 
@@ -18,6 +19,8 @@ export default function DashboardShell({
   user,
 }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const isProfile = pathname === "/profile";
 
   return (
     <SearchProvider>
@@ -38,7 +41,7 @@ export default function DashboardShell({
               />
             </div>
 
-            <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 lg:px-6 lg:py-2">
+            <main className={`min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 lg:px-6 lg:pb-2 ${isProfile ? "pt-0" : "pt-4 lg:pt-2"}`}>
               {children}
 
               {/* Mobile footer */}
