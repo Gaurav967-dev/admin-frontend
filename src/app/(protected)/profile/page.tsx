@@ -280,10 +280,10 @@ export default function ProfilePage() {
     .format(new Date(profile.created_at)).replaceAll("/", ".") : "Unavailable";
   
   return (
-    <div className="mx-auto w-full max-w-[1150px]">
+    <div className="w-full">
 
       {/* Page header */}
-      <div className="sticky top-0 z-40 mb-3 flex flex-nowrap items-center gap-2 border-b border-slate-100 bg-white py-2 shadow-sm dark:border-slate-800 dark:bg-[#171c28]">
+      <div className="sticky top-0 z-40 -mx-3 mb-3 flex flex-nowrap items-center gap-2 border-b border-slate-100 bg-white px-3 py-2 shadow-sm sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6 dark:border-slate-800 dark:bg-[#171c28]">
 
         {/* Left: back button, employee name */}
         <div className="flex min-w-0 flex-1 items-center gap-2">
