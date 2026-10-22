@@ -27,7 +27,7 @@ export default function Header({
 
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-[#171c28]/95">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 px-3 py-2 sm:flex sm:min-h-16 sm:gap-3 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 px-3 py-2 sm:flex sm:min-h-14 sm:gap-3 sm:px-6 lg:px-8">
 
         {/* Left: Menu, page title */}
         <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-2 sm:order-1 sm:gap-3">

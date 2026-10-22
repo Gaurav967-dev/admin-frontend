@@ -77,13 +77,9 @@ export default function UserFormDialog({
 }: FormProps) {
     const isEdit = editingUser !== null;
 
-    const [form, setForm] = useState<FormValues>(
-        defaultValues
-    );
+    const [form, setForm] = useState<FormValues>(defaultValues);
 
-    const [errors, setErrors] = useState<
-        Record<string, string>
-    >({});
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const [apiError, setApiError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -181,9 +177,7 @@ export default function UserFormDialog({
             onOpenChange(false);
 
         } catch (err) {
-            setApiError(
-                err instanceof Error ? err.message : "Unable to save user"
-            );
+            setApiError(err instanceof Error ? err.message : "Unable to save user");
         } finally {
             setLoading(false);
         }

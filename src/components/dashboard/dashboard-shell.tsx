@@ -21,7 +21,7 @@ export default function DashboardShell({
 
   return (
     <SearchProvider>
-      <div className="h-dvh overflow-hidden bg-[#e9ebef] dark:bg-[#0e121b] lg:p-4">
+      <div className="h-dvh overflow-hidden bg-[#e9ebef] dark:bg-[#0e121b]">
         <div className="mx-auto flex h-full min-h-0 max-w-[1600px] overflow-hidden bg-white shadow-sm dark:bg-[#171c28] lg:rounded-xl">
 
           <Sidebar
