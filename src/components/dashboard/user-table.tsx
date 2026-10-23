@@ -449,7 +449,7 @@ export default function UserTable({
           )}
 
           {/* Table pagination */}
-          <div className="mt-2 flex flex-col gap-3 border-t border-slate-100 pt-3 dark:border-slate-800 xl:flex-row xl:items-center xl:justify-between">
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-slate-100 pt-3 dark:border-slate-800">
 
             {/* Count and rows dropdown */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -482,7 +482,7 @@ export default function UserTable({
             </div>
 
             {/* Page navigation */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex shrink-0 flex-nowrap items-center gap-2">
 
               <Button
                 type="button"
