@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 
 import Sidebar from "./sidebar";
 import Header from "./header";
@@ -21,6 +21,21 @@ export default function DashboardShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const isProfile = pathname === "/profile";
+
+  useEffect(() => {
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    // Disable browser level scrolling while dashboard is mounted
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    // Restore scrolling when leaving protected dashboard layout
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, []);
 
   return (
     <SearchProvider>
