@@ -6,7 +6,7 @@ import { SearchIcon } from "@/components/icons/search";
 import { MenuIcon } from "@/components/icons/menu";
 
 import ThemeToggle from "./theme-toggle";
-import { useDashboardSearch } from "./search-context";
+import { useDashboardSearch } from "@/components/dashboard/search-context";
 
 import type { AuthenticatedUser } from "@/types/dashboard";
 
