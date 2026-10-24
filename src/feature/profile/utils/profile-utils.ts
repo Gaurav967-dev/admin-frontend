@@ -1,4 +1,4 @@
-import type { ProfileData, ProfileFormValues } from "@/types/profile";
+import type { ProfileData, ProfileFormValues } from "../type/profile-type";
 
 export function profileToForm(
   profile: ProfileData

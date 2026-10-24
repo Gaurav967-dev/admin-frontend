@@ -16,9 +16,9 @@ import { Copy } from "lucide-react";
 
 import { apiFetch, ApiError } from "@/lib/api";
 
-import { profileToForm, profileToPayload, calculateProgress } from "@/lib/profile";
+import { profileToForm, profileToPayload, calculateProgress } from "@/feature/profile/utils/profile-utils";
 
-import type { ProfileData, ProfileFormValues, ProfileSaveResponse, TaskKey } from "@/types/profile";
+import type { ProfileData, ProfileFormValues, ProfileSaveResponse, TaskKey } from "@/feature/profile/type/profile-type";
 
 type TextField = | "first_name" | "last_name" | "email" | "phone" | "position" | "team" | "manager" | "lead";
 
