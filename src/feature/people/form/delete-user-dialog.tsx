@@ -1,12 +1,9 @@
 "use client";
 
 import { useState } from "react";
-
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
-
 import { Button } from "@/components/ui/button";
-import { apiFetch } from "@/lib/api";
-
+import { deleteUser } from "@/service/user-service";
 import type { DashboardUser } from "@/types/dashboard";
 
 type DeleteUserDialogProps = {
@@ -30,19 +27,13 @@ export default function DeleteUserDialog({
         setError("");
 
         try {
-            const result = await apiFetch<{
-                message: string;
-            }>(`/user?user_id=${user.id}`, {
-                method: "DELETE",
-            });
+            const result = await deleteUser(user.id);
 
             onDeleted(result.message, user.id);
             onOpenChange(false);
 
         } catch (err) {
-            setError(
-                err instanceof Error ? err.message : "Unable to delete user"
-            );
+            setError(err instanceof Error ? err.message : "Unable to delete user");
         } finally {
             setLoading(false);
         }
@@ -68,8 +59,7 @@ export default function DeleteUserDialog({
                         Are you sure you want to delete{" "}
                         <strong>{user?.name}</strong>?
 
-                        This action permanently removes the user's
-                        account and cannot be undone.
+                        This action permanently removes the user's account and cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 

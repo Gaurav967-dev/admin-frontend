@@ -1,5 +1,5 @@
-import UserTable from "@/components/dashboard/user-table";
+import PeopleContainer from "@/feature/people/container/people-container";
 
-export default function UsersPage() {
-    return <UserTable management />;
+export default function UserPage() {
+    return <PeopleContainer management />;
 }
