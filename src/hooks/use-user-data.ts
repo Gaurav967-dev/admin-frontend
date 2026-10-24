@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { fetchUsers } from "@/service/user-service";
 
-import { useDashboardSearch } from "@/components/dashboard/search-context";
+import { useDashboardSearch } from "@/context/search-context";
 import { DEFAULT_PAGE_SIZE } from "@/constant/people";
 
 import type { TableResponse, UserFilter } from "@/feature/people/type/people-type";

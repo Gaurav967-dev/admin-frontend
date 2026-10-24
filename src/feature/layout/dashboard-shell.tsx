@@ -4,7 +4,7 @@ import { useState, useEffect, type ReactNode } from "react";
 
 import Sidebar from "./sidebar";
 import Header from "./header";
-import { SearchProvider } from "../../components/dashboard/search-context";
+import { SearchProvider } from "@/context/search-context";
 import { usePathname } from "next/navigation"
 
 import type { AuthenticatedUser } from "@/types/dashboard";
