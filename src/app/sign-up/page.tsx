@@ -1,5 +1,5 @@
-import AuthForm from "@/components/auth-form";
+import AuthContainer from "@/feature/auth/container/auth-container";
 
 export default function SignUpPage() {
-    return <AuthForm mode = "signup" />;
+    return <AuthContainer mode="signup" />;
 }

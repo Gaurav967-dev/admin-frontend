@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import DashboardShell from "@/components/dashboard/dashboard-shell";
+import DashboardShell from "@/feature/layout/dashboard-shell";
 import { apiFetch, ApiError } from "@/lib/api";
 
 import type {
