@@ -64,16 +64,16 @@ export default function Sidebar({
   }
 
   const navigationGroups = [
-    ...(isAdmin
-      ? [{
-        title: "Admin View",
-        items: adminMenuItems,
-      }]
-      : []),
     {
       title: "My View",
       items: myMenuItems,
     },
+    ...(isAdmin
+      ? [{
+          title: "Admin View",
+          items: adminMenuItems,
+        }]
+      : []),
   ];
 
   async function handleLogout() {
