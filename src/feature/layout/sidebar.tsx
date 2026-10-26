@@ -10,7 +10,6 @@ import { UsersIcon } from "@/components/icons/users";
 import { UserIcon } from "@/components/icons/user";
 import { FileTextIcon } from "@/components/icons/file-text";
 import { LogoutIcon } from "@/components/icons/logout";
-import { ShieldCheckIcon } from "@/components/icons/shield-check";
 import { ChevronRight } from "lucide-react";
 import type { AuthenticatedUser } from "@/types/dashboard";
 
@@ -140,33 +139,31 @@ export default function Sidebar({
 
             return (
               <div key={group.title}>
-
-                {/* Clickable group heading */}
+                
+                {/* Clickable Admin View / My View */}
                 <button
                   type="button"
                   onClick={() => toggleGroup(group.title)}
                   aria-expanded={isExpanded}
                   aria-controls={panelId}
-                  className={`mb-2 flex w-full items-center gap-3 border-b border-slate-200 px-3 py-3 text-xs font-semibold transition-colors dark:border-slate-800 ${isExpanded
-                      ? "text-[#6048ce]"
-                      : "text-slate-500 hover:text-[#6048ce] dark:text-slate-400"
+                  className={`mb-2 flex w-full items-center justify-between
+                    rounded-lg px-3 py-3 text-sm font-medium
+                    transition-colors duration-200
+                    focus-visible:outline-none
+                    focus-visible:ring-2 focus-visible:ring-[#6048ce]
+                    ${
+                      isExpanded
+                        ? "bg-purple-50 text-[#6048ce] hover:bg-purple-100 dark:bg-purple-950/30 dark:text-purple-300 dark:hover:bg-purple-900/40"
+                        : "text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                     }`}
                 >
-                  {group.title === "Admin View" ? (
-                    <ShieldCheckIcon size={18} />
-                  ) : (
-                    <UserIcon size={18} />
-                  )}
+                  <span>{group.title}</span>
 
-                  <span className="flex-1 text-left">
-                    {group.title}
-                  </span>
-
-                  {/* Expand / collapse arrow */}
                   <ChevronRight
                     size={16}
-                    className={`shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-90" : "rotate-0"
-                      }`}
+                    className={`shrink-0 transition-transform duration-200 ${
+                      isExpanded ? "rotate-90" : "rotate-0"
+                    }`}
                   />
                 </button>
 
