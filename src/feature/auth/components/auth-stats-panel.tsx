@@ -14,11 +14,6 @@ export default function AuthStatsPanel() {
     const [error, setError] = useState(false);
 
     useEffect(() => {
-        if (!API_URL) {
-            setError(true);
-            return;
-        }
-
         const controller = new AbortController;
 
         fetch(`${API_URL}/public-stats`, {

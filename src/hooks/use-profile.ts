@@ -41,30 +41,37 @@ export function useProfile() {
 
     const { reset, setError: setFieldError } = methods;
 
-    const loadProfile = useCallback(async () => {
-        setLoading(true);
-        setError("");
-
+    const fetchProfile = useCallback(async () => {
         try {
             const result = await getEmployeeProfile();
 
             setProfile(result);
             reset(profileToForm(result));
+            setError("");
         } catch (err) {
             if (err instanceof ApiError && err.status === 401) {
                 router.replace("/");
                 return;
             }
 
-            setError(err instanceof Error ? err.message : "Unable to load your profile");
+            setError(
+                err instanceof Error ? err.message : "Unable to load your profile"
+            );
         } finally {
             setLoading(false);
         }
     }, [reset, router]);
 
     useEffect(() => {
-        void loadProfile();
-    }, [loadProfile]);
+        void fetchProfile();
+    }, [fetchProfile]);
+
+    // Called from the Retry button.
+    function loadProfile() {
+        setLoading(true);
+        setError("");
+        void fetchProfile();
+    }
 
     async function saveProfile(values: ProfileFormValues) {
         if (!profile) return;

@@ -59,7 +59,7 @@ export default function DeleteUserDialog({
                         Are you sure you want to delete{" "}
                         <strong>{user?.name}</strong>?
 
-                        This action permanently removes the user's account and cannot be undone.
+                        This action permanently removes the user&apos;s account and cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 

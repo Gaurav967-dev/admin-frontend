@@ -1,33 +1,29 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from "react";
 import { ApiError } from "@/lib/api";
 import { fetchUsers } from "@/service/user-service";
-
 import { useDashboardSearch } from "@/context/search-context";
 import { DEFAULT_PAGE_SIZE } from "@/constant/people";
-
 import type { TableResponse, UserFilter } from "@/feature/people/type/people-type";
 
 export function useUserData(management: boolean) {
     const { search } = useDashboardSearch();
     const latestRequestId = useRef(0);
+    const lastAppliedSearch = useRef(search.trim());
     const [data, setData] = useState<TableResponse | null>(null);
-
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-    const [pageInput, setPageInput] = useState("1");
+
+    const [pageInputDraft, setPageInputDraft] = useState<string | null>(null);
+    const pageInput = pageInputDraft ?? String(page);
     const [filter, setFilter] = useState<UserFilter>("all");
-    const [debouncedSearch, setDebouncedSearch] = useState(search);
+    const [debouncedSearch, setDebouncedSearch] = useState(search.trim());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // Fetch users from FastAPI.
-    const loadUsers = useCallback(async () => {
+    const fetchPage = useCallback(async () => {
         const requestId = ++latestRequestId.current;
-
-        setLoading(true);
-        setError("");
 
         try {
             const result = await fetchUsers({
@@ -38,16 +34,21 @@ export function useUserData(management: boolean) {
                 filter,
             });
 
-            if (requestId !== latestRequestId.current) return;
+            if (requestId !== latestRequestId.current) {
+                return;
+            }
 
             setData(result);
+            setError("");
         } catch (err) {
-            if (requestId !== latestRequestId.current) return;
+            if (requestId !== latestRequestId.current) {
+                return;
+            }
 
             if (err instanceof ApiError) {
                 if (err.status === 403) {
                     setError("Administrator permission required.");
-                } else if (err.status === 401) {
+                } else if (err.status === 401 || err.status === 419) {
                     setError("Your session has expired.");
                 } else {
                     setError(err.message);
@@ -68,32 +69,44 @@ export function useUserData(management: boolean) {
         filter,
     ]);
 
-    // Wait 300ms before applying search.
+    // Initial fetch and refetch when pagination/filter values change.
+    useEffect(() => {
+        void fetchPage();
+    }, [fetchPage]);
+
+    // Called by Refresh, Retry, and CRUD success handlers.
+    function loadUsers() {
+        setLoading(true);
+        setError("");
+        void fetchPage();
+    }
+
     useEffect(() => {
         const timer = window.setTimeout(() => {
-            setDebouncedSearch(search.trim());
+            const value = search.trim();
+
+            if (value === lastAppliedSearch.current) {
+                return;
+            }
+
+            lastAppliedSearch.current = value;
+
+            setLoading(true);
+            setDebouncedSearch(value);
             setPage(1);
-            setPageInput("1");
+            setPageInputDraft(null);
         }, 300);
 
         return () => window.clearTimeout(timer);
     }, [search]);
 
-    // Reload when request parameters change.
-    useEffect(() => {
-        void loadUsers();
-    }, [loadUsers]);
-
-    // Synchronize Go-to-Page input.
-    useEffect(() => {
-        setPageInput(String(page));
-    }, [page]);
-
-    // Dashboard uses local filtering, User Management uses backend filtering.
+    // Dashboard: local filtering, Users page: backend filtering.
     const filteredUsers = useMemo(() => {
         if (!data) return [];
 
-        if (management) return data.users;
+        if (management) {
+            return data.users;
+        }
 
         const query = search.trim().toLowerCase();
 
@@ -132,27 +145,42 @@ export function useUserData(management: boolean) {
         ? data?.filtered_total ?? 0
         : filteredUsers.length;
 
-    const startRow = totalMatches === 0
-        ? 0
-        : (page - 1) * pageSize + 1;
+    const startRow =
+        totalMatches === 0
+            ? 0
+            : (page - 1) * pageSize + 1;
 
-    const endRow = totalMatches === 0
-        ? 0
-        : Math.min(
-            totalMatches,
-            startRow + pageRows.length - 1
-        );
+    const endRow =
+        totalMatches === 0
+            ? 0
+            : Math.min(
+                totalMatches,
+                startRow + pageRows.length - 1
+            );
+
+    // Used by Previous and Next.
+    function changePage(update: SetStateAction<number>) {
+        setLoading(true);
+        setPage(update);
+        setPageInputDraft(null);
+    }
 
     function changeFilter(value: UserFilter) {
+        if (value === filter) return;
+
+        setLoading(true);
         setFilter(value);
         setPage(1);
-        setPageInput("1");
+        setPageInputDraft(null);
     }
 
     function changePageSize(value: number) {
+        if (value === pageSize) return;
+
+        setLoading(true);
         setPageSize(value);
         setPage(1);
-        setPageInput("1");
+        setPageInputDraft(null);
     }
 
     function goToPage() {
@@ -163,12 +191,16 @@ export function useUserData(management: boolean) {
             requestedPage < 1 ||
             requestedPage > totalPages
         ) {
-            setPageInput(String(page));
+            setPageInputDraft(null);
             return;
         }
 
-        setPage(requestedPage);
-        setPageInput(String(requestedPage));
+        if (requestedPage !== page) {
+            setLoading(true);
+            setPage(requestedPage);
+        }
+
+        setPageInputDraft(null);
     }
 
     function refreshAfterDelete(deletedUserId: number) {
@@ -179,9 +211,11 @@ export function useUserData(management: boolean) {
             pageRows[0].id === deletedUserId;
 
         if (deletedLastRow) {
-            setPage((current) => current - 1);
+            setLoading(true);
+            setPage(page - 1);
+            setPageInputDraft(null);
         } else {
-            void loadUsers();
+            loadUsers();
         }
     }
 
@@ -200,8 +234,8 @@ export function useUserData(management: boolean) {
         startRow,
         endRow,
 
-        setPage,
-        setPageInput,
+        setPage: changePage,
+        setPageInput: setPageInputDraft,
         changeFilter,
         changePageSize,
         goToPage,
