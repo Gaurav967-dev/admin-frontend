@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ApiError } from "@/lib/api";
-import { profileSchema } from "@/feature/profile/schema/profile-schema";
+import { createProfileSchema } from "@/feature/profile/schema/profile-schema";
 import { profileToForm } from "@/feature/profile/utils/profile-utils";
 import { getEmployeeProfile, updateEmployeeProfile } from "@/service/profile-service";
 import type { ProfileData, ProfileFormValues } from "@/feature/profile/type/profile-type";
@@ -32,7 +32,7 @@ export function useProfile() {
     const [notice, setNotice] = useState("");
 
     const methods = useForm<ProfileFormValues>({
-        resolver: zodResolver(profileSchema),
+        resolver: zodResolver(createProfileSchema(Boolean(profile?.phone?.trim()))),
         mode: "onBlur",
         reValidateMode: "onChange",
         defaultValues,

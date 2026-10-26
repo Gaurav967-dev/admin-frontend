@@ -30,12 +30,7 @@ export const profileSchema = z.object({
     // Email is displayed but cannot be edited on Profile.
     email: z.string(),
 
-    // Empty phone is allowed. A provided number must follow the validation rule.
-    phone: z.string().trim().max(20).refine(
-        (value) =>
-            !value || /^\+?[1-9]\d{6,14}$/.test(value),
-        "Enter 7–15 digits, optionally starting with +"
-    ),
+    phone: z.string(),
 
     position: optionalText,
     team: optionalText,
@@ -58,3 +53,28 @@ export const profileSchema = z.object({
             "Every onboarding task must appear once"
         ),
 });
+
+export function createProfileSchema(
+    phoneAlreadySaved: boolean
+) {
+    return profileSchema.superRefine((values, ctx) => {
+        if (phoneAlreadySaved) return;
+
+        const phone = values.phone.trim();
+
+        // Phone is optional until first entry.
+        if (!phone) return;
+
+        // Validate only newly entered number.
+        if (
+            phone.length > 20 ||
+            !/^\+?[1-9]\d{6,14}$/.test(phone)
+        ) {
+            ctx.addIssue({
+                code: "custom",
+                path: ["phone"],
+                message: "Enter 7-15 digits, optionally starting with +"
+            });
+        }
+    });
+}
