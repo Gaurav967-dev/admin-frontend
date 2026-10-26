@@ -12,6 +12,7 @@ export default function OnboardingSection() {
         control,
         watch,
         setValue,
+        formState: { errors },
     } = useFormContext<ProfileFormValues>();
 
     const values = watch();
@@ -189,6 +190,11 @@ export default function OnboardingSection() {
                     </div>
                 ))}
             </div>
+            {errors.tasks && (
+                <p role="alert" className="text-xs text-red-600">
+                    Please check the onboarding task values.
+                </p>
+            )}
         </section>
     );
 }

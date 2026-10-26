@@ -13,6 +13,8 @@ import { signInSchema, type SignInValues } from "../schema/auth-schema";
 import { signIn } from "@/service/auth-service";
 import { ApiError } from "@/lib/api";
 import { getHomeRoute } from "@/lib/role-routes";
+import { toast } from "sonner";
+import { applyServerValidationErrors } from "@/lib/form-errors";
 
 export default function SignInForm() {
     const router = useRouter();
@@ -33,10 +35,22 @@ export default function SignInForm() {
         try{
             const result = await signIn(values);
 
+            toast.success("Signed in successfully");
+
             router.replace(getHomeRoute(result.user.role));
             router.refresh();
         } catch(error){
-            if(error instanceof ApiError && error.status === 401){
+            if (
+                applyServerValidationErrors<SignInValues>(
+                    error,
+                    setError,
+                    ["email", "password"]
+                )
+            ) {
+                return;
+            }
+
+            if (error instanceof ApiError && error.status === 401) {
                 setError("password", {
                     type: "server",
                     message: "Invalid email or password",

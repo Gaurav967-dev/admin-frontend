@@ -9,6 +9,8 @@ import { createProfileSchema } from "@/feature/profile/schema/profile-schema";
 import { profileToForm } from "@/feature/profile/utils/profile-utils";
 import { getEmployeeProfile, updateEmployeeProfile } from "@/service/profile-service";
 import type { ProfileData, ProfileFormValues } from "@/feature/profile/type/profile-type";
+import { toast } from "sonner";
+import { applyServerValidationErrors } from "@/lib/form-errors";
 
 const defaultValues: ProfileFormValues = {
     first_name: "",
@@ -29,7 +31,6 @@ export function useProfile() {
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [notice, setNotice] = useState("");
 
     const methods = useForm<ProfileFormValues>({
         resolver: zodResolver(createProfileSchema(Boolean(profile?.phone?.trim()))),
@@ -69,7 +70,6 @@ export function useProfile() {
         if (!profile) return;
 
         setError("");
-        setNotice("");
 
         const addingPhone = !profile.phone?.trim() && Boolean(values.phone.trim());
 
@@ -81,9 +81,33 @@ export function useProfile() {
 
             setProfile(result.profile);
             reset(profileToForm(result.profile));
-
-            setNotice(addingPhone ? "Phone Number Added Successfully" : result.message);
+            toast.success(
+                addingPhone
+                    ? "Phone Number Added Successfully"
+                    : result.message
+            );
         } catch (err) {
+            if (
+                applyServerValidationErrors<ProfileFormValues>(
+                    err,
+                    setFieldError,
+                    [
+                        "first_name",
+                        "last_name",
+                        "phone",
+                        "position",
+                        "team",
+                        "manager",
+                        "lead",
+                        "onboarding_start",
+                        "onboarding_required",
+                        "tasks",
+                    ]
+                )
+            ) {
+                return;
+            }
+
             if (
                 err instanceof ApiError &&
                 err.status === 409 &&
@@ -105,10 +129,10 @@ export function useProfile() {
 
         try {
             await navigator.clipboard.writeText(value);
-            setNotice(`${label} copied to clipboard`);
+            toast.success(`${label} copied to clipboard`);
             setError("");
         } catch {
-            setError(`Unable to copy ${label.toLowerCase()}`);
+            toast.error(`Unable to copy ${label.toLowerCase()}`);
         }
     }
 
@@ -122,7 +146,6 @@ export function useProfile() {
 
         reset(profileToForm(profile));
         setError("");
-        setNotice("");
     }
 
     return {
@@ -130,7 +153,6 @@ export function useProfile() {
         profile,
         loading,
         error,
-        notice,
         loadProfile,
         saveProfile,
         copyText,

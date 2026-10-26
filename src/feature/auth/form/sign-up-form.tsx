@@ -13,6 +13,8 @@ import { signUpSchema, type SignUpValues } from "../schema/auth-schema";
 import { signUp } from "@/service/auth-service";
 import { ApiError } from "@/lib/api";
 import { getHomeRoute } from "@/lib/role-routes";
+import { toast } from "sonner";
+import { applyServerValidationErrors } from "@/lib/form-errors";
 
 export default function SignUpForm() {
     const router = useRouter();
@@ -30,10 +32,27 @@ export default function SignUpForm() {
         try{
             const result = await signUp(values);
 
+            toast.success("Account created successfully")
+
             router.replace(getHomeRoute(result.user.role));
             router.refresh();
         } catch(error){
-            if(error instanceof ApiError && error.status === 409) {
+            if (
+                applyServerValidationErrors<SignUpValues>(
+                    error,
+                    setError,
+                    [
+                        "name",
+                        "email",
+                        "password",
+                        "confirmPassword",
+                    ]
+                )
+            ) {
+                return;
+            }
+
+            if (error instanceof ApiError && error.status === 409) {
                 setError("email", {
                     type: "server",
                     message: "Email already registered",

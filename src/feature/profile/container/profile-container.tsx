@@ -12,7 +12,6 @@ export default function ProfileContainer() {
         profile,
         loading,
         error,
-        notice,
         loadProfile,
         saveProfile,
         copyText,
@@ -62,12 +61,6 @@ export default function ProfileContainer() {
                 {error && (
                     <p role="alert" className="mb-2 text-xs text-red-600">
                         {error}
-                    </p>
-                )}
-
-                {notice && (
-                    <p role="status" className="mb-2 text-xs text-green-600">
-                        {notice}
                     </p>
                 )}
 

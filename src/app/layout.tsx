@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-
 import { ThemeProvider } from "@/components/theme-provider";
+import Notifications from "@/components/custom-ui/notifications";
 
 export const metadata: Metadata = {
   title: "Expinova Admin Dashboard",
@@ -23,6 +23,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Notifications />
         </ThemeProvider>
       </body>
     </html>

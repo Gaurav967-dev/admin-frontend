@@ -13,6 +13,7 @@ import FieldError from "@/components/custom-ui/field-error";
 import { createUserSchema, editUserSchema, type UserFormValues } from "../schema/user-schema";
 import { createUser, updateUser } from "@/service/user-service";
 import { ApiError } from "@/lib/api";
+import { applyServerValidationErrors } from "@/lib/form-errors";
 
 import type { DashboardUser } from "@/types/dashboard";
 
@@ -89,6 +90,22 @@ export default function UserFormDialog({
             onSaved(result.message);
             onOpenChange(false);
         } catch (error) {
+            if (
+                applyServerValidationErrors<UserFormValues>(
+                    error,
+                    setError,
+                    [
+                        "name",
+                        "email",
+                        "password",
+                        "role",
+                        "is_active",
+                    ]
+                )
+            ) {
+                return;
+            }
+
             if (
                 error instanceof ApiError &&
                 error.status === 409

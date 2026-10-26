@@ -11,6 +11,7 @@ import DeleteUserDialog from "../form/delete-user-dialog";
 
 import { useUserData } from "@/hooks/use-user-data";
 import type { DashboardUser } from "@/types/dashboard";
+import { toast } from "sonner";
 
 type Props = {
     management?: boolean;
@@ -46,7 +47,6 @@ export default function PeopleContainer({
     const [editingUser, setEditingUser] = useState<DashboardUser | null>(null);
     const [deletingUser, setDeletingUser] = useState<DashboardUser | null>(null);
     const [formOpen, setFormOpen] = useState(false);
-    const [notice, setNotice] = useState("");
 
     function openCreate() {
         setEditingUser(null);
@@ -59,7 +59,7 @@ export default function PeopleContainer({
     }
 
     function handleSaved(message: string) {
-        setNotice(message);
+        toast.success(message);
         void loadUsers();
     }
 
@@ -67,7 +67,7 @@ export default function PeopleContainer({
         message: string,
         deletedUserId: number
     ) {
-        setNotice(message);
+        toast.success(message);
         refreshAfterDelete(deletedUserId);
     }
 
@@ -82,23 +82,6 @@ export default function PeopleContainer({
                 onCreate={openCreate}
                 onRefresh={() => void loadUsers()}
             />
-
-            {/* Success message */}
-            {notice && (
-                <div
-                    role="status"
-                    className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-900 dark:bg-green-950/30 dark:text-green-400"
-                >
-                    <span>{notice}</span>
-                    <button
-                        type="button"
-                        onClick={() => setNotice("")}
-                        aria-label="Dismiss message"
-                    >
-                        ×
-                    </button>
-                </div>
-            )}
 
             {/* Loading */}
             {loading && (
