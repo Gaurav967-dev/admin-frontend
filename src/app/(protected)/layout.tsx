@@ -1,16 +1,10 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-
+import { usePathname, useRouter } from "next/navigation";
 import DashboardShell from "@/feature/layout/dashboard-shell";
 import { apiFetch, ApiError } from "@/lib/api";
-
-import type {
-  AuthenticatedUser,
-  VerifyResponse,
-} from "@/types/dashboard";
+import type { AuthenticatedUser, VerifyResponse } from "@/types/dashboard";
 
 export default function ProtectedLayout({
   children,
@@ -18,7 +12,7 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-
+  const pathname = usePathname();
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -61,6 +55,17 @@ export default function ProtectedLayout({
     };
   }, [router, attempt]);
 
+  const adminOnlyPage =
+    pathname === "/dashboard" || pathname === "/user";
+  const mustRedirect =
+    user !== null && user.role !== "admin" && adminOnlyPage;
+
+  useEffect(() => {
+    if (mustRedirect) {
+      router.replace("/profile");
+    }
+  }, [mustRedirect, router]);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -94,7 +99,7 @@ export default function ProtectedLayout({
     );
   }
 
-  if (!user) {
+  if (!user || mustRedirect) {
     return null;
   }
 

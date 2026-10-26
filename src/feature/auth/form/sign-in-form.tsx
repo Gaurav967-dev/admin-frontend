@@ -12,6 +12,7 @@ import FieldError from "@/components/custom-ui/field-error";
 import { signInSchema, type SignInValues } from "../schema/auth-schema";
 import { signIn } from "@/service/auth-service";
 import { ApiError } from "@/lib/api";
+import { getHomeRoute } from "@/lib/role-routes";
 
 export default function SignInForm() {
     const router = useRouter();
@@ -30,9 +31,9 @@ export default function SignInForm() {
 
     async function onSubmit(values: SignInValues) {
         try{
-            await signIn(values);
+            const result = await signIn(values);
 
-            router.push("/dashboard");
+            router.replace(getHomeRoute(result.user.role));
             router.refresh();
         } catch(error){
             if(error instanceof ApiError && error.status === 401){

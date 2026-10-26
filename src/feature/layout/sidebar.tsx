@@ -11,10 +11,9 @@ import { UserIcon } from "@/components/icons/user";
 import { FileTextIcon } from "@/components/icons/file-text";
 import { LogoutIcon } from "@/components/icons/logout";
 import { ShieldCheckIcon } from "@/components/icons/shield-check";
-
 import type { AuthenticatedUser } from "@/types/dashboard";
 
-const menuItems = [
+const adminMenuItems = [
   {
     name: "Dashboard",
     href: "/dashboard",
@@ -25,6 +24,9 @@ const menuItems = [
     href: "/user",
     icon: UsersIcon,
   },
+];
+
+const myMenuItems = [
   {
     name: "Profile",
     href: "/profile",
@@ -48,6 +50,19 @@ export default function Sidebar({
 
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
+  const isAdmin = user.role === "admin";
+  const navigationGroups = [
+    ...(isAdmin
+      ? [{
+        title: "Admin View",
+        items: adminMenuItems,
+      }]
+      : []),
+    {
+      title: "My View",
+      items: myMenuItems,
+    },
+  ];
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -101,50 +116,53 @@ export default function Sidebar({
           </span>
         </div>
 
-        {/* Navigation */}
-        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-4 pt-5">
-          <div className="mb-2 border-b border-slate-200 px-3 pb-3 text-xs font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400">
-            My View
-          </div>
+        <nav className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 pt-5">
+          {navigationGroups.map((group) => (
+            <div key={group.title}>
 
-          <div className="mb-3 flex items-center gap-3 px-3 pt-2 text-xs font-semibold text-[#6048ce]">
-            <ShieldCheckIcon
-              size={18}
-              className="flex size-[18px] shrink-0 items-center justify-center"
-            />
+              {/* Group heading */}
+              <div className="mb-2 flex items-center gap-2 border-b border-slate-200 px-3 pb-3 text-xs font-semibold text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                {group.title === "Admin View" ? (
+                  <ShieldCheckIcon size={16} />
+                ) : (
+                  <UserIcon size={16} />
+                )}
 
-            <span className="leading-none">
-              Admin View
-            </span>
-          </div>
+                <span>{group.title}</span>
+              </div>
 
-          {menuItems.map((item) => {
-            const active = pathname === item.href;
-            const Icon = item.icon;
+              {/* Navigation links */}
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const active = pathname === item.href;
+                  const Icon = item.icon;
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={close}
-                aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200
-                  ${
-                    active ? "bg-[#6048ce] text-white shadow-sm" : "text-slate-600 hover:bg-slate-200/70 dark:text-slate-300 dark:hover:bg-slate-800"
-                  }
-                `}
-              >
-                <Icon
-                  size={20}
-                  className="flex size-5 shrink-0 items-center justify-center"
-                />
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={close}
+                      aria-current={active ? "page" : undefined}
+                      className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${active
+                          ? "bg-[#6048ce] text-white shadow-sm"
+                          : "text-slate-600 hover:bg-slate-200/70 dark:text-slate-300 dark:hover:bg-slate-800"
+                        }`}
+                    >
+                      <Icon
+                        size={20}
+                        className="flex size-5 shrink-0 items-center justify-center"
+                      />
 
-                <span className="leading-none">
-                  {item.name}
-                </span>
-              </Link>
-            );
-          })}
+                      <span className="leading-none">
+                        {item.name}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+
+            </div>
+          ))}
         </nav>
 
         {/* Bottom section */}
@@ -157,7 +175,7 @@ export default function Sidebar({
               {user.email}
             </p>
             <p className="mt-1 text-xs capitalize text-[#6048ce]">
-              {user.role}
+              {isAdmin ? "Admin" : "User"}
             </p>
           </div>
 
@@ -177,7 +195,7 @@ export default function Sidebar({
               size={20}
               className="flex size-5 shrink-0 items-center justify-center"
             />
-          
+
             <span className="leading-none">
               {loggingOut ? "Signing out..." : "Logout"}
             </span>

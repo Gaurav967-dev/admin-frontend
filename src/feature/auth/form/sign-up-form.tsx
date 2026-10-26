@@ -12,6 +12,7 @@ import FieldError from "@/components/custom-ui/field-error";
 import { signUpSchema, type SignUpValues } from "../schema/auth-schema";
 import { signUp } from "@/service/auth-service";
 import { ApiError } from "@/lib/api";
+import { getHomeRoute } from "@/lib/role-routes";
 
 export default function SignUpForm() {
     const router = useRouter();
@@ -27,9 +28,9 @@ export default function SignUpForm() {
 
     async function onSubmit(values: SignUpValues) {
         try{
-            await signUp(values);
+            const result = await signUp(values);
 
-            router.push("/dashboard");
+            router.replace(getHomeRoute(result.user.role));
             router.refresh();
         } catch(error){
             if(error instanceof ApiError && error.status === 409) {

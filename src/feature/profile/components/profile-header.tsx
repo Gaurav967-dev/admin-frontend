@@ -28,13 +28,15 @@ export default function ProfileHeader({
         <div className="sticky top-0 z-40 -mx-3 mb-3 flex flex-nowrap items-center gap-2 border-b border-slate-100 bg-white px-3 py-2 shadow-sm sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6 dark:border-slate-800 dark:bg-[#171c28]">
 
             <div className="flex min-w-0 flex-1 items-center gap-2">
-                <Link
-                    href="/dashboard"
-                    aria-label="Back to dashboard"
-                    className="shrink-0 text-slate-600 hover:text-[#6048ce]"
-                >
-                    <ArrowLeftIcon size={18} />
-                </Link>
+                {profile.role === "admin" && (
+                    <Link
+                        href="/dashboard"
+                        aria-label="Back to dashboard"
+                        className="shrink-0 text-slate-600 hover:text-[#6048ce]"
+                    >
+                        <ArrowLeftIcon size={18} />
+                    </Link>
+                )}
 
                 <Image
                     src="/images/profile-avatar.jpg"

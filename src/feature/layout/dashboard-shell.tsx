@@ -56,10 +56,16 @@ export default function DashboardShell({
               />
             </div>
 
-            <main className={`min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 lg:px-6 lg:pb-2 ${isProfile ? "pt-0" : "pt-4 lg:pt-2"}`}>
+            <main className={`flex min-h-0 min-w-0 flex-1 flex-col px-3 py-4 sm:px-5 lg:px-6 ${
+              isProfile 
+                ? "overflow-y-auto overflow-x-hidden pt-0 pb-4 lg:pb-2"
+                : "overflow-hidden pt-4 pb-2 lg:pt-2"
+            }`}>
               {children}
 
-              <footer className="mt-8 border-t border-slate-100 pb-2 pt-4 text-center text-xs text-slate-400 dark:border-slate-800">
+              <footer className={`shrink-0 border-t border-slate-100 pb-2 pt-2 text-center text-xs text-slate-400 dark:border-slate-800 ${
+                isProfile ? "mt-8" : "mt-2"
+              }`}>
                 © 2026 Expinova. All rights reserved.
               </footer>
             </main>

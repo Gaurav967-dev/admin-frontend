@@ -1,9 +1,10 @@
 import { apiFetch } from "@/lib/api";
-
+import type { AuthenticatedUser } from "@/types/dashboard"
 import type { SignInValues, SignUpValues } from "@/feature/auth/schema/auth-schema";
 
 type AuthResponse = {
     message: string;
+    user: AuthenticatedUser;
 };
 
 export function signIn(values: SignInValues) {

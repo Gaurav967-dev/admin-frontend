@@ -72,7 +72,7 @@ export default function PeopleContainer({
     }
 
     return (
-        <div className="w-full">
+        <div className="flex min-h-0 w-full flex-1 flex-col">
 
             <TableToolbar
                 management={management}
@@ -132,37 +132,46 @@ export default function PeopleContainer({
                 </div>
             )}
 
+
             {/* Table and pagination */}
             {!loading && !error && data && (
-                <>
-                    <TableContent
-                        users={pageRows}
-                        management={management}
-                        onView={setViewUser}
-                        onEdit={openEdit}
-                        onDelete={setDeletingUser}
-                    />
+                <div className="flex min-h-0 flex-1 flex-col">
 
-                    <TablePagination
-                        page={page}
-                        pageSize={pageSize}
-                        pageInput={pageInput}
-                        totalPages={totalPages}
-                        totalMatches={totalMatches}
-                        startRow={startRow}
-                        endRow={endRow}
-                        loading={loading}
-                        onPageInputChange={setPageInput}
-                        onPageSizeChange={changePageSize}
-                        onPrevious={() =>
-                            setPage((current) => current - 1)
-                        }
-                        onNext={() =>
-                            setPage((current) => current + 1)
-                        }
-                        onGoToPage={goToPage}
-                    />
-                </>
+                    {/* Only this area scrolls */}
+                    <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
+                        <TableContent
+                            users={pageRows}
+                            management={management}
+                            onView={setViewUser}
+                            onEdit={openEdit}
+                            onDelete={setDeletingUser}
+                        />
+                    </div>
+
+                    {/* Pagination always visible */}
+                    <div className="shrink-0 bg-white dark:bg-[#171c28]">
+                        <TablePagination
+                            page={page}
+                            pageSize={pageSize}
+                            pageInput={pageInput}
+                            totalPages={totalPages}
+                            totalMatches={totalMatches}
+                            startRow={startRow}
+                            endRow={endRow}
+                            loading={loading}
+                            onPageInputChange={setPageInput}
+                            onPageSizeChange={changePageSize}
+                            onPrevious={() =>
+                                setPage((current) => current - 1)
+                            }
+                            onNext={() =>
+                                setPage((current) => current + 1)
+                            }
+                            onGoToPage={goToPage}
+                        />
+                    </div>
+
+                </div>
             )}
 
             <ViewUserDialog

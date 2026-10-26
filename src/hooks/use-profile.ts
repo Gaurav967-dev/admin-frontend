@@ -113,7 +113,16 @@ export function useProfile() {
     }
 
     function cancelChanges() {
-        router.push("/dashboard");
+        if (!profile) return;
+
+        if (profile.role === "admin") {
+            router.push("/dashboard");
+            return;
+        }
+
+        reset(profileToForm(profile));
+        setError("");
+        setNotice("");
     }
 
     return {

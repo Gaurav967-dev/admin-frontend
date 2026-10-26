@@ -23,10 +23,10 @@ export default function TableContent({
 }: Props) {
     return (
         <>
-            <div className="w-full overflow-x-auto">
+            <div className="min-w-full">
                 <table className="w-full min-w-[760px] whitespace-nowrap border-separate border-spacing-y-1 text-left text-sm lg:border-spacing-y-0">
 
-                    <thead>
+                    <thead className="sticky top-0 z-10 bg-[#f5f6f8] dark:bg-slate-800">
                         <tr className="bg-[#f5f6f8] text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                             <th className="rounded-l-lg px-5 py-2">User ID</th>
                             <th className="px-3 py-2">Name</th>
