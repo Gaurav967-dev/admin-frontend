@@ -11,6 +11,7 @@ import { UserIcon } from "@/components/icons/user";
 import { FileTextIcon } from "@/components/icons/file-text";
 import { LogoutIcon } from "@/components/icons/logout";
 import { ShieldCheckIcon } from "@/components/icons/shield-check";
+import { ChevronRight } from "lucide-react";
 import type { AuthenticatedUser } from "@/types/dashboard";
 
 const adminMenuItems = [
@@ -47,10 +48,22 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
   const isAdmin = user.role === "admin";
+
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    "Admin View": isAdmin && pathname !== "/profile",
+    "My View": pathname === "/profile" || !isAdmin,
+  });
+
+  function toggleGroup(title: string) {
+    setOpenGroups((current) => ({
+      ...current,
+      [title]: !current[title],
+    }));
+  }
+
   const navigationGroups = [
     ...(isAdmin
       ? [{
@@ -116,53 +129,86 @@ export default function Sidebar({
           </span>
         </div>
 
-        <nav className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 pt-5">
-          {navigationGroups.map((group) => (
-            <div key={group.title}>
+        <nav className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pt-5">
+          {navigationGroups.map((group) => {
+            const isExpanded = Boolean(openGroups[group.title]);
 
-              {/* Group heading */}
-              <div className="mb-2 flex items-center gap-2 border-b border-slate-200 px-3 pb-3 text-xs font-semibold text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                {group.title === "Admin View" ? (
-                  <ShieldCheckIcon size={16} />
-                ) : (
-                  <UserIcon size={16} />
-                )}
+            const panelId =
+              group.title === "Admin View"
+                ? "admin-view-links"
+                : "my-view-links";
 
-                <span>{group.title}</span>
+            return (
+              <div key={group.title}>
+
+                {/* Clickable group heading */}
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(group.title)}
+                  aria-expanded={isExpanded}
+                  aria-controls={panelId}
+                  className={`mb-2 flex w-full items-center gap-3 border-b border-slate-200 px-3 py-3 text-xs font-semibold transition-colors dark:border-slate-800 ${isExpanded
+                      ? "text-[#6048ce]"
+                      : "text-slate-500 hover:text-[#6048ce] dark:text-slate-400"
+                    }`}
+                >
+                  {group.title === "Admin View" ? (
+                    <ShieldCheckIcon size={18} />
+                  ) : (
+                    <UserIcon size={18} />
+                  )}
+
+                  <span className="flex-1 text-left">
+                    {group.title}
+                  </span>
+
+                  {/* Expand / collapse arrow */}
+                  <ChevronRight
+                    size={16}
+                    className={`shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-90" : "rotate-0"
+                      }`}
+                  />
+                </button>
+
+                {/* Collapsible menu items */}
+                <div
+                  id={panelId}
+                  hidden={!isExpanded}
+                  className="space-y-1"
+                >
+                  {group.items.map((item) => {
+                    const active = pathname === item.href;
+                    const Icon = item.icon;
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => {
+                          close();
+                        }}
+                        aria-current={active ? "page" : undefined}
+                        className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${active
+                            ? "bg-[#6048ce] text-white shadow-sm"
+                            : "text-slate-600 hover:bg-slate-200/70 dark:text-slate-300 dark:hover:bg-slate-800"
+                          }`}
+                      >
+                        <Icon
+                          size={20}
+                          className="flex size-5 shrink-0 items-center justify-center"
+                        />
+
+                        <span className="leading-none">
+                          {item.name}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
+
               </div>
-
-              {/* Navigation links */}
-              <div className="space-y-1">
-                {group.items.map((item) => {
-                  const active = pathname === item.href;
-                  const Icon = item.icon;
-
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={close}
-                      aria-current={active ? "page" : undefined}
-                      className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${active
-                          ? "bg-[#6048ce] text-white shadow-sm"
-                          : "text-slate-600 hover:bg-slate-200/70 dark:text-slate-300 dark:hover:bg-slate-800"
-                        }`}
-                    >
-                      <Icon
-                        size={20}
-                        className="flex size-5 shrink-0 items-center justify-center"
-                      />
-
-                      <span className="leading-none">
-                        {item.name}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-
-            </div>
-          ))}
+            );
+          })}
         </nav>
 
         {/* Bottom section */}
