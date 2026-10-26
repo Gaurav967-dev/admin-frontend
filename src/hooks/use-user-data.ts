@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from "react";
+import { useEffect, useMemo, useRef, useState, type SetStateAction } from "react";
 import { ApiError } from "@/lib/api";
 import { fetchUsers } from "@/service/user-service";
 import { useDashboardSearch } from "@/context/search-context";
@@ -21,64 +21,80 @@ export function useUserData(management: boolean) {
     const [debouncedSearch, setDebouncedSearch] = useState(search.trim());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [reloadKey, setReloadKey] = useState(0);
 
-    const fetchPage = useCallback(async () => {
+    useEffect(() => {
+        let cancelled = false;
+
         const requestId = ++latestRequestId.current;
 
-        try {
-            const result = await fetchUsers({
-                management,
-                page,
-                pageSize,
-                search: debouncedSearch,
-                filter,
+        fetchUsers({
+            management,
+            page,
+            pageSize,
+            search: debouncedSearch,
+            filter,
+        })
+            .then((result) => {
+                if (
+                    cancelled ||
+                    requestId !== latestRequestId.current
+                ) {
+                    return;
+                }
+
+                setData(result);
+                setError("");
+            })
+            .catch((err: unknown) => {
+                if (
+                    cancelled ||
+                    requestId !== latestRequestId.current
+                ) {
+                    return;
+                }
+
+                if (err instanceof ApiError) {
+                    if (err.status === 403) {
+                        setError("Administrator permission required.");
+                    } else if (
+                        err.status === 401 ||
+                        err.status === 419
+                    ) {
+                        setError("Your session has expired.");
+                    } else {
+                        setError(err.message);
+                    }
+                } else {
+                    setError("Unable to load users.");
+                }
+            })
+            .finally(() => {
+                if (
+                    !cancelled &&
+                    requestId === latestRequestId.current
+                ) {
+                    setLoading(false);
+                }
             });
 
-            if (requestId !== latestRequestId.current) {
-                return;
-            }
-
-            setData(result);
-            setError("");
-        } catch (err) {
-            if (requestId !== latestRequestId.current) {
-                return;
-            }
-
-            if (err instanceof ApiError) {
-                if (err.status === 403) {
-                    setError("Administrator permission required.");
-                } else if (err.status === 401 || err.status === 419) {
-                    setError("Your session has expired.");
-                } else {
-                    setError(err.message);
-                }
-            } else {
-                setError("Unable to load users.");
-            }
-        } finally {
-            if (requestId === latestRequestId.current) {
-                setLoading(false);
-            }
-        }
+        return () => {
+            cancelled = true;
+        };
     }, [
         management,
         page,
         pageSize,
         debouncedSearch,
         filter,
+        reloadKey,
     ]);
 
-    // Initial fetch and refetch when pagination/filter values change.
-    useEffect(() => {
-        void fetchPage();
-    }, [fetchPage]);
-
-    // Called by Refresh, Retry, and CRUD success handlers.
+    // Called by Refresh, Retry and CRUD success.
     function loadUsers() {
         setLoading(true);
         setError("");
-        void fetchPage();
+        setReloadKey((current) => current + 1);
     }
 
     useEffect(() => {

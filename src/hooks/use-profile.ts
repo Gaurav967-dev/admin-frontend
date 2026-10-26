@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,6 +31,7 @@ export function useProfile() {
     const [profile, setProfile] = useState<ProfileData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [retryCount, setRetryCount] = useState(0);
 
     const methods = useForm<ProfileFormValues>({
         resolver: zodResolver(createProfileSchema(Boolean(profile?.phone?.trim()))),
@@ -41,36 +42,46 @@ export function useProfile() {
 
     const { reset, setError: setFieldError } = methods;
 
-    const fetchProfile = useCallback(async () => {
-        try {
-            const result = await getEmployeeProfile();
-
-            setProfile(result);
-            reset(profileToForm(result));
-            setError("");
-        } catch (err) {
-            if (err instanceof ApiError && err.status === 401) {
-                router.replace("/");
-                return;
-            }
-
-            setError(
-                err instanceof Error ? err.message : "Unable to load your profile"
-            );
-        } finally {
-            setLoading(false);
-        }
-    }, [reset, router]);
-
     useEffect(() => {
-        void fetchProfile();
-    }, [fetchProfile]);
+        let cancelled = false;
 
-    // Called from the Retry button.
+        getEmployeeProfile()
+            .then((result) => {
+                if (cancelled) return;
+
+                setProfile(result);
+                reset(profileToForm(result));
+                setError("");
+            })
+            .catch((err: unknown) => {
+                if (cancelled) return;
+
+                if (
+                    err instanceof ApiError &&
+                    (err.status === 401 || err.status === 419)
+                ) {
+                    router.replace("/");
+                    return;
+                }
+
+                setError(err instanceof Error ? err.message : "Unable to load your profile");
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [reset, router, retryCount]);
+
+    // Called when the user clicks Try Again.
     function loadProfile() {
         setLoading(true);
         setError("");
-        void fetchProfile();
+        setRetryCount((current) => current + 1);
     }
 
     async function saveProfile(values: ProfileFormValues) {
