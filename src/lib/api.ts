@@ -2,219 +2,248 @@ import { toast } from "sonner";
 import { API_URL } from "@/lib/config";
 
 type ValidationIssue = {
-  loc?: Array<string | number>;
-  msg?: string;
+    loc?: Array<string | number>;
+    msg?: string;
 };
 
 type ErrorBody = {
-  detail?: string | ValidationIssue[];
-  message?: string;
+    detail?: string | ValidationIssue[];
+    message?: string;
 };
 
 export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-    public fieldErrors: Record<string, string> = {}
-  ) {
-    super(message);
-    this.name = "ApiError";
-  }
+    constructor(
+        public status: number,
+        message: string,
+        public fieldErrors: Record<string, string> = {}
+    ) {
+        super(message);
+        this.name = "ApiError";
+    }
 }
 
 // Avoid multiple simultaneous refresh requests.
-let refreshInFlight: Promise<boolean> | null = null;
+type RefreshResult = {
+    ok: boolean;
+    status: number;
+};
 
-async function refreshAccessToken(): Promise<boolean> {
-  try {
-    const response = await fetch(
-      `${API_URL}/refresh-token`,
-      {
-        method: "POST",
-        credentials: "include",
-        cache: "no-store",
-      }
-    );
+let refreshInFlight: Promise<RefreshResult> | null = null;
 
-    return response.ok;
-  } catch {
-    return false;
-  }
+async function refreshAccessToken(): Promise<RefreshResult> {
+    try {
+        const response = await fetch(
+            `${API_URL}/refresh-token`,
+            {
+                method: "POST",
+                credentials: "include",
+                cache: "no-store",
+            }
+        );
+
+        return {
+            ok: response.ok,
+            status: response.status,
+        };
+    } catch {
+        return {
+            ok: false,
+            status: 0,
+        };
+    }
 }
 
-function getRefreshResult(): Promise<boolean> {
-  if (!refreshInFlight) {
-    refreshInFlight = refreshAccessToken().finally(() => {
-      refreshInFlight = null;
-    });
-  }
+function getRefreshResult(): Promise<RefreshResult> {
+    if (!refreshInFlight) {
+        refreshInFlight = refreshAccessToken().finally(() => {
+            refreshInFlight = null;
+        });
+    }
 
-  return refreshInFlight;
+    return refreshInFlight;
 }
 
 // Convert FastAPI responses to structured errors.
 async function readApiError(
-  response: Response
+    response: Response
 ): Promise<ApiError> {
-  let message = `Request failed: ${response.status}`;
+    let message = `Request failed: ${response.status}`;
 
-  const fieldErrors: Record<string, string> = {};
+    const fieldErrors: Record<string, string> = {};
 
-  try {
-    const body = (await response.json()) as ErrorBody;
+    try {
+        const body = (await response.json()) as ErrorBody;
 
-    if (typeof body.detail === "string") {
-      message = body.detail;
-    } else if (Array.isArray(body.detail)) {
-      for (const issue of body.detail) {
-        if (typeof issue.msg !== "string") continue;
+        if (typeof body.detail === "string") {
+            message = body.detail;
+        } else if (Array.isArray(body.detail)) {
+            for (const issue of body.detail) {
+                if (typeof issue.msg !== "string") continue;
 
-        const location = Array.isArray(issue.loc)
-          ? issue.loc
-          : [];
+                const location = Array.isArray(issue.loc)
+                    ? issue.loc
+                    : [];
 
-        if (location[0] === "body") {
-          const field = location
-            .slice(1)
-            .map(String)
-            .join(".");
+                if (location[0] === "body") {
+                    const field = location
+                        .slice(1)
+                        .map(String)
+                        .join(".");
 
-          if (field && !fieldErrors[field]) {
-            fieldErrors[field] = issue.msg;
-          }
+                    if (field && !fieldErrors[field]) {
+                        fieldErrors[field] = issue.msg;
+                    }
+                }
+
+                if (message.startsWith("Request failed:")) {
+                    message = issue.msg;
+                }
+            }
+        } else if (typeof body.message === "string") {
+            message = body.message;
         }
-
-        if (message.startsWith("Request failed:")) {
-          message = issue.msg;
-        }
-      }
-    } else if (typeof body.message === "string") {
-      message = body.message;
+    } catch {
+        // Some error responses don't contain JSON.
     }
-  } catch {
-    // Some error responses don't contain JSON.
-  }
 
-  return new ApiError(
-    response.status,
-    message,
-    fieldErrors
-  );
+    return new ApiError(
+        response.status,
+        message,
+        fieldErrors
+    );
 }
 
 // Display appropriate HTTP notifications.
 function notifyApiError(
-  error: ApiError,
-  sessionExpired = false
+    error: ApiError,
+    sessionExpired = false
 ) {
-  if (typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
 
-  if (sessionExpired || error.status === 419) {
-    toast.error("Session expired. Please sign in again.", {
-      id: "session-expired",
+    if (sessionExpired || error.status === 419) {
+        toast.error("Session expired. Please sign in again.", {
+            id: "session-expired",
+        });
+
+        window.dispatchEvent(
+            new Event("expinova:session-expired")
+        );
+
+        return;
+    }
+
+    const messages: Record<number, string> = {
+        0: "Unable to connect to the server.",
+        400: error.message,
+        401: error.message || "Unauthorized request.",
+        403: "You do not have permission to perform this action.",
+        404: error.message || "Requested resource not found.",
+        409: error.message,
+        422: "Please correct the highlighted form fields.",
+        429: "Too many requests. Please try again later.",
+    };
+
+    const message =
+        messages[error.status] ??
+        (error.status >= 500
+            ? "Server error. Please try again later."
+            : error.message);
+
+    toast.error(message, {
+        id: `api-error-${error.status}-${message}`,
     });
-
-    window.dispatchEvent(
-      new Event("expinova:session-expired")
-    );
-
-    return;
-  }
-
-  const messages: Record<number, string> = {
-    0: "Unable to connect to the server.",
-    400: error.message,
-    401: error.message || "Unauthorized request.",
-    403: "You do not have permission to perform this action.",
-    404: error.message || "Requested resource not found.",
-    409: error.message,
-    422: "Please correct the highlighted form fields.",
-    429: "Too many requests. Please try again later.",
-  };
-
-  const message =
-    messages[error.status] ??
-    (error.status >= 500
-      ? "Server error. Please try again later."
-      : error.message);
-
-  toast.error(message, {
-    id: `api-error-${error.status}-${message}`,
-  });
 }
 
 export async function apiFetch<T>(
-  path: string,
-  options: RequestInit = {}
+    path: string,
+    options: RequestInit = {}
 ): Promise<T> {
-  async function makeRequest(): Promise<Response> {
-    try {
-      return await fetch(`${API_URL}${path}`, {
-        ...options,
-        credentials: "include",
-        cache: "no-store",
-        headers: {
-          ...(options.body
-            ? { "Content-Type": "application/json" }
-            : {}),
-          ...options.headers,
-        },
-      });
-    } catch (error) {
-      if (options.signal?.aborted) {
+    async function makeRequest(): Promise<Response> {
+        try {
+            return await fetch(`${API_URL}${path}`, {
+                ...options,
+                credentials: "include",
+                cache: "no-store",
+                headers: {
+                    ...(options.body
+                        ? { "Content-Type": "application/json" }
+                        : {}),
+                    ...options.headers,
+                },
+            });
+        } catch (error) {
+            if (options.signal?.aborted) {
+                throw error;
+            }
+
+            const networkError = new ApiError(
+                0,
+                "Unable to connect to the server."
+            );
+
+            notifyApiError(networkError);
+            throw networkError;
+        }
+    }
+
+    let response = await makeRequest();
+
+    const publicAuthPaths = [
+        "/sign",
+        "/signup",
+        "/refresh-token",
+    ];
+
+    // Retry protected requests after access-token expiration.
+    if (
+        response.status === 401 &&
+        !publicAuthPaths.includes(path)
+    ) {
+        const refresh = await getRefreshResult();
+
+        if (!refresh.ok) {
+            const status = refresh.status;
+
+            const sessionEnded =
+                status === 401 || status === 419;
+
+            const message = sessionEnded
+                ? "Session expired. Please sign in again."
+                : status === 0
+                    ? "Unable to connect to the server."
+                    : "Unable to renew your session.";
+
+            const error = new ApiError(status, message);
+
+            notifyApiError(error, sessionEnded);
+            throw error;
+        }
+
+        // Refresh succeeded. Retry original API request.
+        response = await makeRequest();
+
+        // Access denied even after successful refresh.
+        if (response.status === 401) {
+            const error = new ApiError(
+                401,
+                "Session expired. Please sign in again."
+            );
+
+            notifyApiError(error, true);
+            throw error;
+        }
+    }
+
+    if (!response.ok) {
+        const error = await readApiError(response);
+
+        notifyApiError(error);
         throw error;
-      }
-
-      const networkError = new ApiError(
-        0,
-        "Unable to connect to the server."
-      );
-
-      notifyApiError(networkError);
-      throw networkError;
-    }
-  }
-
-  let response = await makeRequest();
-
-  const publicAuthPaths = [
-    "/sign",
-    "/signup",
-    "/refresh-token",
-  ];
-
-  // Retry protected requests once after refreshing.
-  if (
-    response.status === 401 &&
-    !publicAuthPaths.includes(path)
-  ) {
-    const refreshed = await getRefreshResult();
-
-    if (refreshed) {
-      response = await makeRequest();
     }
 
-    if (response.status === 401) {
-      const error = new ApiError(
-        401,
-        "Session expired. Please sign in again."
-      );
-
-      notifyApiError(error, true);
-      throw error;
+    if (response.status === 204) {
+        return undefined as T;
     }
-  }
 
-  if (!response.ok) {
-    const error = await readApiError(response);
-
-    notifyApiError(error);
-    throw error;
-  }
-
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
-  return (await response.json()) as T;
+    return (await response.json()) as T;
 }
