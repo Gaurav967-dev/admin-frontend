@@ -36,7 +36,7 @@ export default function TablePagination({
     onGoToPage,
 }: Props) {
     return (
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-slate-100 pt-1 dark:border-slate-800">
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <p className="text-xs text-slate-500 dark:text-slate-400">
