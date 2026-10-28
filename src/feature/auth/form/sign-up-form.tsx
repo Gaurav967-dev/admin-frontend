@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,11 +14,10 @@ import { ApiError } from "@/lib/api";
 import { getHomeRoute } from "@/lib/role-routes";
 import { toast } from "sonner";
 import { applyServerValidationErrors } from "@/lib/form-errors";
+import PasswordInput from "@/components/custom-ui/password-input";
 
 export default function SignUpForm() {
     const router = useRouter();
-
-    const [showPassword, setShowPassword] = useState(false);
 
     const { register, handleSubmit, setError, formState: { errors, isSubmitting }} = useForm<SignUpValues>({
         resolver: zodResolver(signUpSchema),
@@ -112,24 +110,13 @@ export default function SignUpForm() {
                 <Label htmlFor="signup-password">Password</Label>
                 
                 <div className="relative">
-                    <Input
+                    <PasswordInput
                         id="signup-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
                         autoComplete="new-password"
+                        placeholder="Enter your password"
                         {...register("password")}
                         aria-invalid={!!errors.password}
-                        aria-describedby={errors.password ? "signup-password-error" : undefined}
-                        className="pr-16"
                     />
-
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword((current) => !current)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500"
-                    >
-                        {showPassword ? "Hide" : "Show"}
-                    </button>
                 </div>
 
                 <FieldError
@@ -140,14 +127,12 @@ export default function SignUpForm() {
 
             <div className="space-y-1.5">
                 <Label htmlFor="signup-confirm">Confirm Password</Label>
-                <Input
+                <PasswordInput
                     id="signup-confirm"
-                    type="password"
                     autoComplete="new-password"
                     placeholder="Confirm your password"
                     {...register("confirmPassword")}
                     aria-invalid={!!errors.confirmPassword}
-                    aria-describedby={errors.confirmPassword ? "signup-confirm-error" : undefined}
                 />
 
                 <FieldError

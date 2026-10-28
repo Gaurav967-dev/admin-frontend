@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,11 +14,10 @@ import { ApiError } from "@/lib/api";
 import { getHomeRoute } from "@/lib/role-routes";
 import { toast } from "sonner";
 import { applyServerValidationErrors } from "@/lib/form-errors";
+import PasswordInput from "@/components/custom-ui/password-input";
 
 export default function SignInForm() {
     const router = useRouter();
-
-    const [showPassword, setShowPassword] = useState(false);
 
     const { register, handleSubmit, setError, formState: { errors, isSubmitting }} = useForm<SignInValues>({
         resolver: zodResolver(signInSchema),
@@ -93,24 +91,14 @@ export default function SignInForm() {
                 <Label htmlFor="signin-password">Password</Label>
                 
                 <div className="relative">
-                    <Input
+                    <PasswordInput
                         id="signin-password"
-                        type={showPassword ? "text" : "password"}
                         autoComplete="current-password"
                         placeholder="Enter your password"
                         {...register("password")}
                         aria-invalid={!!errors.password}
                         aria-describedby={errors.password ? "signin-password-error" : undefined}
-                        className="pr-16"
                     />
-                    
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword((current) => !current)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500"
-                    >
-                        {showPassword ? "Hide" : "Show"}
-                    </button>
                 </div>
 
                 <FieldError

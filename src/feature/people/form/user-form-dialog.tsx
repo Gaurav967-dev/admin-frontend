@@ -14,7 +14,8 @@ import { createUserSchema, editUserSchema, type UserFormValues } from "../schema
 import { createUser, updateUser } from "@/service/user-service";
 import { ApiError } from "@/lib/api";
 import { applyServerValidationErrors } from "@/lib/form-errors";
-
+import { useMutation } from "@tanstack/react-query";
+import PasswordInput from "@/components/custom-ui/password-input";
 import type { DashboardUser } from "@/types/dashboard";
 
 type Props = {
@@ -147,6 +148,11 @@ export default function UserFormDialog({
                             ? "Update the user's account information."
                             : "Enter the details to create a new account."}
                     </DialogDescription>
+                    {!isEdit && (
+                        <p className="text-xs text-slate-500">
+                            <span className="text-red-600">*</span> Required fields
+                        </p>
+                    )}
                 </DialogHeader>
 
                 <form
@@ -156,23 +162,46 @@ export default function UserFormDialog({
                 >
                     {/* Name */}
                     <div className="space-y-2">
-                        <Label htmlFor="user-name">Full Name</Label>
-                        <Input
-                            id="user-name"
-                            placeholder="Enter full name"
-                            {...register("name")}
-                            aria-invalid={!!errors.name}
+                        <Label htmlFor="user-name">
+                            Full Name <span className="text-red-600" aria-hidden="true">*</span>
+                        </Label>
+
+                        <Controller
+                            name="name"
+                            control={control}
+                            render={({ field }) => (
+                                <Input
+                                    id="user-name"
+                                    name={field.name}
+                                    ref={field.ref}
+                                    value={field.value}
+                                    onBlur={field.onBlur}
+                                    onChange={(event) => {
+                                        const lettersOnly = event.target.value.replace(/[^\p{L} ]/gu, "");
+                                        field.onChange(lettersOnly);
+                                    }}
+                                    placeholder="Enter full name"
+                                    autoComplete="name"
+                                    required
+                                    aria-invalid={!!errors.name}
+                                />
+                            )}
                         />
+
                         <FieldError message={errors.name?.message} />
                     </div>
 
                     {/* Email */}
                     <div className="space-y-2">
-                        <Label htmlFor="user-email">Email Address</Label>
+                        <Label htmlFor="user-email">
+                            Email Address <span className="text-red-600" aria-hidden="true">*</span>
+                        </Label>
+
                         <Input
                             id="user-email"
                             type="email"
                             placeholder="name@example.com"
+                            required
                             {...register("email")}
                             aria-invalid={!!errors.email}
                         />
@@ -182,12 +211,15 @@ export default function UserFormDialog({
                     {/* Password */}
                     <div className="space-y-2">
                         <Label htmlFor="user-password">
-                            {isEdit ? "New Password (Optional)" : "Password"}
+                            {isEdit ? "New Password (Optional)" : (
+                                <>
+                                    Password <span className="text-red-600" aria-hidden="true">*</span>
+                                </>
+                            )}
                         </Label>
 
-                        <Input
+                        <PasswordInput
                             id="user-password"
-                            type="password"
                             autoComplete="new-password"
                             placeholder={
                                 isEdit
@@ -195,18 +227,26 @@ export default function UserFormDialog({
                                     : "Minimum 12 characters"
                             }
                             {...register("password")}
+                            required={!isEdit}
                             aria-invalid={!!errors.password}
                         />
+
+                        <p className="text-xs text-slate-500">
+                            12-128 characters, including uppercase, lowercase, a number and a special character.
+                        </p>
 
                         <FieldError message={errors.password?.message} />
                     </div>
 
                     {/* Role */}
                     <div className="space-y-2">
-                        <Label htmlFor="user-role">User Role</Label>
+                        <Label htmlFor="user-role">
+                            User Role <span className="text-red-600" aria-hidden="true">*</span>
+                        </Label>
 
                         <select
                             id="user-role"
+                            required
                             {...register("role")}
                             className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         >
