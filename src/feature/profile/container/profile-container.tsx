@@ -12,7 +12,7 @@ export default function ProfileContainer() {
         profile,
         loading,
         error,
-        loadProfile,
+        refetchProfile,
         saveProfile,
         copyText,
         cancelChanges,
@@ -41,7 +41,7 @@ export default function ProfileContainer() {
 
                 <Button
                     type="button"
-                    onClick={() => void loadProfile()}
+                    onClick={() => void refetchProfile()}
                     className="mt-4 bg-[#6048ce] text-white"
                 >
                     Try Again

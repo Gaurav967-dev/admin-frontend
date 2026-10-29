@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { API_URL } from "@/lib/config";
 
 type Stats = {
@@ -10,31 +10,31 @@ type Stats = {
 };
 
 export default function AuthStatsPanel() {
-    const [stats, setStats] = useState<Stats | null>(null);
-    const [error, setError] = useState(false);
+    const {
+        data: stats,
+        isError,
+    } = useQuery<Stats>({
+        queryKey: ["public-stats"],
 
-    useEffect(() => {
-        const controller = new AbortController;
-
-        fetch(`${API_URL}/public-stats`, {
-            signal: controller.signal,
-            cache: "no-store",
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Stats unavailable");
+        queryFn: async ({ signal }) => {
+            const response = await fetch(
+                `${API_URL}/public-stats`,
+                {
+                    signal,
+                    cache: "no-store",
                 }
-                return response.json();
-            })
-            .then((data: Stats) => setStats(data))
-            .catch((err) => {
-                if (err.name !== "AbortError") {
-                    setError(true);
-                }
-            });
+            );
 
-        return () => controller.abort();
-    }, []);
+            if (!response.ok) {
+                throw new Error("Stats unavailable");
+            }
+
+            return (await response.json()) as Stats;
+        },
+
+        staleTime: 30_000,
+        retry: false,
+    });
 
     const cards = [
         {
@@ -84,14 +84,17 @@ export default function AuthStatsPanel() {
                                 </p>
 
                                 <p className="mt-1 text-lg font-bold md:text-2xl">
-                                    {error ? "—" : card.value ?? "..."}
+                                    {isError ? "—" : card.value ?? "..."}
                                 </p>
                             </div>
                         ))}
                     </div>
 
-                    {error && (
-                        <p role="status" className="mt-1 text-xs text-red-500">
+                    {isError && (
+                        <p
+                            role="status"
+                            className="mt-1 text-xs text-red-500"
+                        >
                             Statistics unavailable.
                         </p>
                     )}

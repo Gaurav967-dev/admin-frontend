@@ -3,12 +3,15 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Toaster } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Notifications() {
     const router = useRouter();
+    const queryClient = useQueryClient();
 
     useEffect(() => {
         function handleSessionExpired() {
+            queryClient.clear();
             router.replace("/");
             router.refresh();
         }
@@ -24,7 +27,7 @@ export default function Notifications() {
                 handleSessionExpired
             );
         };
-    }, [router]);
+    }, [router, queryClient]);
 
     return (
         <Toaster

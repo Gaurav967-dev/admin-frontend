@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import DashboardShell from "@/feature/layout/dashboard-shell";
 import { apiFetch, ApiError } from "@/lib/api";
-import type { AuthenticatedUser, VerifyResponse } from "@/types/dashboard";
+import type { VerifyResponse } from "@/types/dashboard";
 
 export default function ProtectedLayout({
     children,
@@ -13,64 +14,54 @@ export default function ProtectedLayout({
 }) {
     const router = useRouter();
     const pathname = usePathname();
-    const [user, setUser] = useState<AuthenticatedUser | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [attempt, setAttempt] = useState(0);
 
-    useEffect(() => {
-        let cancelled = false;
+    const {
+        data,
+        error,
+        isPending,
+        isFetching,
+        refetch,
+    } = useQuery<VerifyResponse, Error>({
+        queryKey: ["auth", "current-user"],
 
-        async function checkAuthentication() {
-            try {
-                const result = await apiFetch<VerifyResponse>(
-                    "/verify-token"
-                );
+        queryFn: () =>
+            apiFetch<VerifyResponse>("/verify-token"),
 
-                if (!cancelled) {
-                    setUser(result.user);
-                    setError("");
-                }
-            } catch (err) {
-                if (cancelled) return;
+        staleTime: 0,
+        refetchOnMount: "always",
+        retry: false,
+    });
 
-                if (err instanceof ApiError && err.status === 401) {
-                    router.replace("/");
-                } else {
-                    setError(
-                        err instanceof Error ? err.message : "Could not verify your session"
-                    );
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
-        }
+    const user = data?.user ?? null;
 
-        checkAuthentication();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [router, attempt]);
+    const isAuthError =
+        error instanceof ApiError &&
+        (error.status === 401 || error.status === 419);
 
     const adminOnlyPage =
-        pathname === "/dashboard" || pathname === "/user";
-    const mustRedirect =
-        user !== null && user.role !== "admin" && adminOnlyPage;
+        pathname === "/dashboard" ||
+        pathname === "/user";
 
+    const mustRedirect =
+        user !== null &&
+        user.role !== "admin" &&
+        adminOnlyPage;
+
+    // Navigation side effect, not API data fetching.
     useEffect(() => {
-        if (mustRedirect) {
+        if (isAuthError) {
+            router.replace("/");
+        } else if (mustRedirect) {
             router.replace("/profile");
         }
-    }, [mustRedirect, router]);
+    }, [isAuthError, mustRedirect, router]);
 
-    if (loading) {
+    if (isPending || isFetching) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
                 <div className="text-center">
                     <div className="mx-auto size-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#6048ce]" />
+
                     <p className="mt-4 text-sm text-slate-500">
                         Verifying your session...
                     </p>
@@ -79,18 +70,20 @@ export default function ProtectedLayout({
         );
     }
 
+    if (isAuthError || mustRedirect) {
+        return null;
+    }
+
     if (error) {
         return (
             <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
                 <p role="alert" className="text-red-600">
-                    {error}
+                    {error.message || "Could not verify your session"}
                 </p>
 
                 <button
-                    onClick={() => {
-                        setLoading(true);
-                        setAttempt((value) => value + 1);
-                    }}
+                    type="button"
+                    onClick={() => void refetch()}
                     className="rounded-lg bg-[#6048ce] px-5 py-2 text-white"
                 >
                     Retry
@@ -99,7 +92,7 @@ export default function ProtectedLayout({
         );
     }
 
-    if (!user || mustRedirect) {
+    if (!user) {
         return null;
     }
 
