@@ -15,26 +15,29 @@ import { getHomeRoute } from "@/lib/role-routes";
 import { toast } from "sonner";
 import { applyServerValidationErrors } from "@/lib/form-errors";
 import PasswordInput from "@/components/custom-ui/password-input";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function SignUpForm() {
     const router = useRouter();
+    const queryClient = useQueryClient();
 
-    const { register, handleSubmit, setError, formState: { errors, isSubmitting }} = useForm<SignUpValues>({
+    const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<SignUpValues>({
         resolver: zodResolver(signUpSchema),
         mode: "onBlur",
         reValidateMode: "onChange",
-        defaultValues: { name: "", email: "", password: "", confirmPassword: ""},
+        defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
     });
 
     async function onSubmit(values: SignUpValues) {
-        try{
+        try {
             const result = await signUp(values);
 
-            toast.success("Account created successfully")
+            toast.success("Account created successfully");
+            queryClient.clear();
 
             router.replace(getHomeRoute(result.user.role));
             router.refresh();
-        } catch(error){
+        } catch (error) {
             if (
                 applyServerValidationErrors<SignUpValues>(
                     error,
@@ -108,7 +111,7 @@ export default function SignUpForm() {
 
             <div className="space-y-1.5">
                 <Label htmlFor="signup-password">Password</Label>
-                
+
                 <div className="relative">
                     <PasswordInput
                         id="signup-password"

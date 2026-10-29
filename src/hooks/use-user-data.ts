@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type SetStateAction } from "react";
+import { useMemo, useState, type SetStateAction } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "use-debounce";
 import { ApiError } from "@/lib/api";
 import { fetchUsers } from "@/service/user-service";
 import { useDashboardSearch } from "@/context/search-context";
@@ -9,114 +11,76 @@ import type { TableResponse, UserFilter } from "@/feature/people/type/people-typ
 
 export function useUserData(management: boolean) {
     const { search } = useDashboardSearch();
-    const latestRequestId = useRef(0);
-    const lastAppliedSearch = useRef(search.trim());
-    const [data, setData] = useState<TableResponse | null>(null);
-    const [page, setPage] = useState(1);
+    const [debouncedSearch] = useDebounce(search.trim(), 300);
+
+    const [pageSelection, setPageSelection] = useState({
+        page: 1,
+        search: search.trim(),
+    });
+
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-
-    const [pageInputDraft, setPageInputDraft] = useState<string | null>(null);
-    const pageInput = pageInputDraft ?? String(page);
     const [filter, setFilter] = useState<UserFilter>("all");
-    const [debouncedSearch, setDebouncedSearch] = useState(search.trim());
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [reloadKey, setReloadKey] = useState(0);
+    const [pageInputDraft, setPageInputDraft] = useState<string | null>(null);
 
-    useEffect(() => {
-        let cancelled = false;
+    // New search terms automatically start on page 1.
+    const searchIsCurrent =
+        pageSelection.search === debouncedSearch;
 
-        const requestId = ++latestRequestId.current;
+    const page = searchIsCurrent
+        ? pageSelection.page
+        : 1;
 
-        fetchUsers({
-            management,
-            page,
-            pageSize,
-            search: debouncedSearch,
-            filter,
-        })
-            .then((result) => {
-                if (
-                    cancelled ||
-                    requestId !== latestRequestId.current
-                ) {
-                    return;
-                }
+    const pageInput =
+        searchIsCurrent && pageInputDraft !== null
+            ? pageInputDraft
+            : String(page);
 
-                setData(result);
-                setError("");
-            })
-            .catch((err: unknown) => {
-                if (
-                    cancelled ||
-                    requestId !== latestRequestId.current
-                ) {
-                    return;
-                }
+    // TanStack Query owns server data and request state.
+    const query = useQuery<TableResponse, Error>({
+        queryKey: management
+            ? [
+                "users",
+                "management",
+                page,
+                pageSize,
+                debouncedSearch,
+                filter,
+            ]
+            : ["users", "dashboard"],
 
-                if (err instanceof ApiError) {
-                    if (err.status === 403) {
-                        setError("Administrator permission required.");
-                    } else if (
-                        err.status === 401 ||
-                        err.status === 419
-                    ) {
-                        setError("Your session has expired.");
-                    } else {
-                        setError(err.message);
-                    }
-                } else {
-                    setError("Unable to load users.");
-                }
-            })
-            .finally(() => {
-                if (
-                    !cancelled &&
-                    requestId === latestRequestId.current
-                ) {
-                    setLoading(false);
-                }
-            });
+        queryFn: () =>
+            fetchUsers({
+                management,
+                page,
+                pageSize,
+                search: debouncedSearch,
+                filter,
+            }),
 
-        return () => {
-            cancelled = true;
-        };
-    }, [
-        management,
-        page,
-        pageSize,
-        debouncedSearch,
-        filter,
-        reloadKey,
-    ]);
+        retry: false,
+    });
 
-    // Called by Refresh, Retry and CRUD success.
-    function loadUsers() {
-        setLoading(true);
-        setError("");
-        setReloadKey((current) => current + 1);
+    const data = query.data ?? null;
+    const loading = query.isPending || query.isFetching;
+
+    let error = "";
+
+    if (query.error instanceof ApiError) {
+        if (query.error.status === 403) {
+            error = "Administrator permission required.";
+        } else if (
+            query.error.status === 401 ||
+            query.error.status === 419
+        ) {
+            error = "Your session has expired.";
+        } else {
+            error = query.error.message;
+        }
+    } else if (query.error) {
+        error = "Unable to load users.";
     }
 
-    useEffect(() => {
-        const timer = window.setTimeout(() => {
-            const value = search.trim();
-
-            if (value === lastAppliedSearch.current) {
-                return;
-            }
-
-            lastAppliedSearch.current = value;
-
-            setLoading(true);
-            setDebouncedSearch(value);
-            setPage(1);
-            setPageInputDraft(null);
-        }, 300);
-
-        return () => window.clearTimeout(timer);
-    }, [search]);
-
-    // Dashboard: local filtering, Users page: backend filtering.
+    // Dashboard filters locally, User Management is already filtered by FastAPI.
     const filteredUsers = useMemo(() => {
         if (!data) return [];
 
@@ -124,14 +88,14 @@ export function useUserData(management: boolean) {
             return data.users;
         }
 
-        const query = search.trim().toLowerCase();
+        const term = search.trim().toLowerCase();
 
         return data.users.filter((user) => {
             const matchesSearch =
-                user.name.toLowerCase().includes(query) ||
-                user.email.toLowerCase().includes(query) ||
-                user.role.toLowerCase().includes(query) ||
-                String(user.id).includes(query);
+                user.name.toLowerCase().includes(term) ||
+                user.email.toLowerCase().includes(term) ||
+                user.role.toLowerCase().includes(term) ||
+                String(user.id).includes(term);
 
             const matchesFilter =
                 filter === "all" ||
@@ -174,28 +138,40 @@ export function useUserData(management: boolean) {
                 startRow + pageRows.length - 1
             );
 
-    // Used by Previous and Next.
+    // Previous, Next, or another page selection.
     function changePage(update: SetStateAction<number>) {
-        setLoading(true);
-        setPage(update);
-        setPageInputDraft(null);
-    }
+        const nextPage =
+            typeof update === "function"
+                ? update(page)
+                : update;
 
-    function changeFilter(value: UserFilter) {
-        if (value === filter) return;
+        setPageSelection({
+            page: nextPage,
+            search: debouncedSearch,
+        });
 
-        setLoading(true);
-        setFilter(value);
-        setPage(1);
         setPageInputDraft(null);
     }
 
     function changePageSize(value: number) {
-        if (value === pageSize) return;
-
-        setLoading(true);
         setPageSize(value);
-        setPage(1);
+
+        setPageSelection({
+            page: 1,
+            search: debouncedSearch,
+        });
+
+        setPageInputDraft(null);
+    }
+
+    function changeFilter(value: UserFilter) {
+        setFilter(value);
+
+        setPageSelection({
+            page: 1,
+            search: debouncedSearch,
+        });
+
         setPageInputDraft(null);
     }
 
@@ -211,28 +187,7 @@ export function useUserData(management: boolean) {
             return;
         }
 
-        if (requestedPage !== page) {
-            setLoading(true);
-            setPage(requestedPage);
-        }
-
-        setPageInputDraft(null);
-    }
-
-    function refreshAfterDelete(deletedUserId: number) {
-        const deletedLastRow =
-            management &&
-            page > 1 &&
-            pageRows.length === 1 &&
-            pageRows[0].id === deletedUserId;
-
-        if (deletedLastRow) {
-            setLoading(true);
-            setPage(page - 1);
-            setPageInputDraft(null);
-        } else {
-            loadUsers();
-        }
+        changePage(requestedPage);
     }
 
     return {
@@ -243,7 +198,6 @@ export function useUserData(management: boolean) {
         filter,
         loading,
         error,
-        filteredUsers,
         pageRows,
         totalPages,
         totalMatches,
@@ -255,7 +209,8 @@ export function useUserData(management: boolean) {
         changeFilter,
         changePageSize,
         goToPage,
-        loadUsers,
-        refreshAfterDelete,
+
+        // TanStack Query refresh function.
+        refetch: query.refetch,
     };
 }

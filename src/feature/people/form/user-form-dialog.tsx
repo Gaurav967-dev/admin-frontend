@@ -41,6 +41,24 @@ export default function UserFormDialog({
 }: Props) {
     const isEdit = editingUser !== null;
 
+    const saveUserMutation = useMutation({
+        mutationFn: async (values: UserFormValues) => {
+            const { password, ...commonValues } = values;
+
+            if (editingUser) {
+                return updateUser(editingUser.id, {
+                    ...commonValues,
+                    ...(password ? { password } : {}),
+                });
+            }
+
+            return createUser({
+                ...commonValues,
+                password,
+            });
+        },
+    });
+
     const {
         register,
         control,
@@ -76,17 +94,7 @@ export default function UserFormDialog({
 
     async function onSubmit(values: UserFormValues) {
         try {
-            const { password, ...commonValues } = values;
-
-            const result = editingUser
-                ? await updateUser(editingUser.id, {
-                    ...commonValues,
-                    ...(password ? { password } : {}),
-                })
-                : await createUser({
-                    ...commonValues,
-                    password,
-                });
+            const result = await saveUserMutation.mutateAsync(values);
 
             onSaved(result.message);
             onOpenChange(false);

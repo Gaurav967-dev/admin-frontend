@@ -12,6 +12,7 @@ import DeleteUserDialog from "../form/delete-user-dialog";
 import { useUserData } from "@/hooks/use-user-data";
 import type { DashboardUser } from "@/types/dashboard";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
     management?: boolean;
@@ -39,14 +40,14 @@ export default function PeopleContainer({
         changeFilter,
         changePageSize,
         goToPage,
-        loadUsers,
-        refreshAfterDelete,
+        refetch,
     } = useUserData(management);
 
     const [viewUser, setViewUser] = useState<DashboardUser | null>(null);
     const [editingUser, setEditingUser] = useState<DashboardUser | null>(null);
     const [deletingUser, setDeletingUser] = useState<DashboardUser | null>(null);
     const [formOpen, setFormOpen] = useState(false);
+    const queryClient = useQueryClient();
 
     function openCreate() {
         setEditingUser(null);
@@ -60,7 +61,10 @@ export default function PeopleContainer({
 
     function handleSaved(message: string) {
         toast.success(message);
-        void loadUsers();
+
+        void queryClient.invalidateQueries({
+            queryKey: ["users"],
+        });
     }
 
     function handleDeleted(
@@ -68,7 +72,21 @@ export default function PeopleContainer({
         deletedUserId: number
     ) {
         toast.success(message);
-        refreshAfterDelete(deletedUserId);
+
+        const deletedLastRow =
+            management &&
+            page > 1 &&
+            pageRows.length === 1 &&
+            pageRows[0].id === deletedUserId;
+
+        // Don't leave the user on an empty last page.
+        if (deletedLastRow) {
+            setPage((current) => current - 1);
+        }
+
+        void queryClient.invalidateQueries({
+            queryKey: ["users"],
+        });
     }
 
     return (
@@ -80,7 +98,7 @@ export default function PeopleContainer({
                 loading={loading}
                 onFilterChange={changeFilter}
                 onCreate={openCreate}
-                onRefresh={() => void loadUsers()}
+                onRefresh={() => void refetch()}
             />
 
             {/* Loading */}
@@ -107,7 +125,7 @@ export default function PeopleContainer({
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => void loadUsers()}
+                        onClick={() => void refetch()}
                         className="mt-4"
                     >
                         Try again

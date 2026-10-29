@@ -1,6 +1,7 @@
 import { apiFetch } from "@/lib/api";
 
 import type { UserFilter, TableResponse, UserSavePayload, UserMutationResponse } from "@/feature/people/type/people-type";
+import type { DashboardUser } from "@/types/dashboard";
 
 type FetchUserOptions = {
     management: boolean;
@@ -17,7 +18,7 @@ export function fetchUsers({
     search,
     filter,
 }: FetchUserOptions) {
-    if(!management) {
+    if (!management) {
         return apiFetch<TableResponse>("/dashboard");
     }
 
@@ -26,7 +27,7 @@ export function fetchUsers({
         page_size: String(pageSize),
         search,
         status_filter: filter === "active" || filter === "inactive" ? filter : "all",
-        role_filter:filter === "admins" ? "admin" : "all",
+        role_filter: filter === "admins" ? "admin" : "all",
     });
 
     return apiFetch<TableResponse>(`/user?${params.toString()}`);
@@ -54,4 +55,8 @@ export function deleteUser(userId: number) {
             method: "DELETE",
         }
     );
+}
+
+export function getUserById(userId: number) {
+    return apiFetch<DashboardUser>(`/user/${userId}`);
 }

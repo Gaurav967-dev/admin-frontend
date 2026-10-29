@@ -15,9 +15,11 @@ import { getHomeRoute } from "@/lib/role-routes";
 import { toast } from "sonner";
 import { applyServerValidationErrors } from "@/lib/form-errors";
 import PasswordInput from "@/components/custom-ui/password-input";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function SignInForm() {
     const router = useRouter();
+    const queryClient = useQueryClient();
 
     const { register, handleSubmit, setError, formState: { errors, isSubmitting }} = useForm<SignInValues>({
         resolver: zodResolver(signInSchema),
@@ -34,6 +36,7 @@ export default function SignInForm() {
             const result = await signIn(values);
 
             toast.success("Signed in successfully");
+            queryClient.clear();
 
             router.replace(getHomeRoute(result.user.role));
             router.refresh();

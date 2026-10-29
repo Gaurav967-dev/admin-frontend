@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { deleteUser } from "@/service/user-service";
+import { useMutation } from "@tanstack/react-query";
 import type { DashboardUser } from "@/types/dashboard";
 
 type DeleteUserDialogProps = {
@@ -17,25 +18,26 @@ export default function DeleteUserDialog({
     onOpenChange,
     onDeleted,
 }: DeleteUserDialogProps) {
-    const [loading, setLoading] = useState(false);
+    const deleteMutation = useMutation({
+        mutationFn: deleteUser,
+    });
+
+    const loading = deleteMutation.isPending;
     const [error, setError] = useState("");
 
     async function handleDelete() {
         if (!user || loading) return;
 
-        setLoading(true);
         setError("");
 
         try {
-            const result = await deleteUser(user.id);
+            const result = await deleteMutation.mutateAsync(user.id);
 
             onDeleted(result.message, user.id);
             onOpenChange(false);
 
         } catch (err) {
             setError(err instanceof Error ? err.message : "Unable to delete user");
-        } finally {
-            setLoading(false);
         }
     }
 
