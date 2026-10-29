@@ -266,33 +266,60 @@ export default function UserFormDialog({
                     </div>
 
                     {/* Account status */}
-                    <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-4 py-3 dark:bg-slate-800/50">
-                        <Controller
-                            name="is_active"
-                            control={control}
-                            render={({ field }) => (
-                                <Checkbox
-                                    id="user-active"
-                                    checked={field.value}
-                                    onCheckedChange={(checked) =>
-                                        field.onChange(checked === true)
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-4 py-3 dark:bg-slate-800/50">
+                            <Controller
+                                name="is_active"
+                                control={control}
+                                render={({ field }) => (
+                                    <Checkbox
+                                        id="user-active"
+                                        checked={field.value}
+                                        onBlur={field.onBlur}
+                                        onCheckedChange={(checked) =>
+                                            field.onChange(checked === true)
+                                        }
+                                        aria-required={!isEdit}
+                                        aria-invalid={!!errors.is_active}
+                                        aria-describedby={
+                                            errors.is_active
+                                                ? "user-active-error"
+                                                : undefined
+                                        }
+                                    />
+                                )}
+                            />
+
+                            <div>
+                                <Label
+                                    htmlFor="user-active"
+                                    className="cursor-pointer"
+                                >
+                                    Active Account{" "}
+                                    {!isEdit && (
+                                        <span
+                                            className="text-red-600"
+                                            aria-hidden="true"
+                                        >
+                                            *
+                                        </span>
+                                    )}
+                                </Label>
+
+                                <p className="mt-1 text-xs text-slate-500">
+                                    {isEdit
+                                        ? "Uncheck to deactivate this account."
+                                        : "Active Account must be checked to create a user."
                                     }
-                                />
-                            )}
-                        />
-
-                        <div>
-                            <Label htmlFor="user-active" className="cursor-pointer">
-                                Active Account
-                            </Label>
-
-                            <p className="mt-1 text-xs text-slate-500">
-                                Active users can sign in.
-                            </p>
+                                </p>
+                            </div>
                         </div>
-                    </div>
 
-                    <FieldError message={errors.root?.server?.message} />
+                        <FieldError
+                            id="user-active-error"
+                            message={errors.is_active?.message}
+                        />
+                    </div>
 
                     {/* Actions */}
                     <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 dark:border-slate-800 sm:flex-row sm:justify-end">

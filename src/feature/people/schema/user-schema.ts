@@ -26,9 +26,17 @@ const commonUserSchema = z.object({
     is_active: z.boolean(),
 });
 
-export const createUserSchema = commonUserSchema.extend({
-    password: strongPasswordSchema,
-});
+export const createUserSchema = commonUserSchema
+    .extend({
+        password: strongPasswordSchema,
+    })
+    .refine(
+        (data) => data.is_active === true,
+        {
+            message: "Active Account must be checked to create a new user",
+            path: ["is_active"],
+        }
+    );
 
 export const editUserSchema = commonUserSchema.extend({
     password: z.union([
