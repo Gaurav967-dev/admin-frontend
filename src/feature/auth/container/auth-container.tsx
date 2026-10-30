@@ -16,7 +16,7 @@ export default function AuthContainer({
 
     return (
         <div className="min-h-dvh bg-[#f3f4f8] p-3 sm:p-4 md:h-dvh md:overflow-hidden">
-            <div className="mx-auto grid w-full max-w-7xl grid-cols-1 overflow-hidden rounded-[28px] border border-slate-200/70 bg-white shadow-sm md:h-full md:min-h-0 md:grid-cols-2 md:grid-rows-1">
+            <div className="mx-auto grid w-full max-w-7xl grid-cols-1 overflow-hidden rounded-2xl bg-white md:h-full md:min-h-0 md:grid-cols-2 md:grid-rows-1">
 
                 {/* Left: Authentication panel */}
                 <div className="flex min-w-0 flex-col bg-white px-4 py-5 sm:px-7 md:min-h-0 md:overflow-y-auto md:px-6 lg:px-10 xl:px-14">
