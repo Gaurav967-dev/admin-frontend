@@ -18,8 +18,9 @@ export default function PasswordInput({
         <div className="relative">
             <Input
                 {...props}
+                placeholder={props.placeholder ?? ""}
                 type={visible ? "text" : "password"}
-                className={cn("pr-12", className)}
+                className={cn("peer pr-12", className)}
             />
 
             <button
@@ -27,7 +28,7 @@ export default function PasswordInput({
                 aria-label={visible ? "Hide password" : "Show password"}
                 aria-pressed={visible}
                 onClick={() => setVisible((current) => !current)}
-                className="absolute inset-y-0 right-2 flex w-9 items-center justify-center rounded text-slate-500 hover:text-[#6048ce] focus-visible:outline-2 focus-visible:outline-[#6048ce]"
+                className="absolute inset-y-0 right-2 flex w-9 items-center justify-center rounded text-slate-500 hover:text-[#6048ce] focus-visible:outline-2 focus-visible:outline-[#6048ce] peer-placeholder-shown:hidden"
             >
                 {visible ? (
                     <EyeOff size={20} aria-hidden="true" />
