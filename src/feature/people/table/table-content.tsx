@@ -92,7 +92,7 @@ export default function TableContent({
                                             onClick={() => onView(user)}
                                             className="gap-2 text-slate-600 hover:text-[#6048ce] dark:text-slate-300"
                                         >
-                                            <EyeIcon size={18} className="size-[18px]" />
+                                            <EyeIcon size={18} className="size-[18px] mt-1" />
                                             View
                                         </Button>
 
