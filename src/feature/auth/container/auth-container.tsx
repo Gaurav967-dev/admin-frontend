@@ -15,13 +15,12 @@ export default function AuthContainer({
     const isSignup = mode === "signup";
 
     return (
-        <div className="min-h-dvh bg-[#f7f8fc] p-2 sm:p-3 md:h-dvh md:overflow-hidden">
-            <div className="mx-auto grid w-full max-w-7xl grid-cols-1 overflow-hidden rounded-2xl bg-white md:h-full md:min-h-0 md:grid-cols-2 md:grid-rows-1">
+        <div className="min-h-dvh bg-[#f3f4f8] p-3 sm:p-4 md:h-dvh md:overflow-hidden">
+            <div className="mx-auto grid w-full max-w-7xl grid-cols-1 overflow-hidden rounded-[28px] border border-slate-200/70 bg-white shadow-sm md:h-full md:min-h-0 md:grid-cols-2 md:grid-rows-1">
 
-                {/* Left: authentication form */}
-                <div className="flex min-w-0 flex-col px-4 py-5 sm:px-7 md:min-h-0 md:overflow-y-auto md:px-6 lg:px-10 xl:px-14">
+                {/* Left: Authentication panel */}
+                <div className="flex min-w-0 flex-col bg-white px-4 py-5 sm:px-7 md:min-h-0 md:overflow-y-auto md:px-6 lg:px-10 xl:px-14">
 
-                    {/* Branding */}
                     <div className="flex items-center gap-3">
                         <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#6048ce] text-white">
                             <FileTextIcon
@@ -30,22 +29,34 @@ export default function AuthContainer({
                             />
                         </div>
 
-                        <span className="text-2xl font-semibold tracking-tight text-[#6048ce]">Expinova</span>
+                        <span className="text-2xl font-semibold tracking-tight text-[#6048ce]">
+                            Expinova
+                        </span>
                     </div>
 
-                    {/* Page heading and form */}
-                    <div className="my-auto mx-auto w-full max-w-sm py-3 md:py-4">
-
+                    {/* Form */}
+                    <div className="my-auto mx-auto w-full max-w-sm py-6 md:py-4">
                         <div className="mb-4 text-center">
-                            <h1 className="text-3xl font-bold tracking-tight">{isSignup ? "Create your account" : "Welcome back"}</h1>
+                            <h1 className="text-3xl font-bold tracking-tight">
+                                {isSignup
+                                    ? "Create your account"
+                                    : "Welcome back"}
+                            </h1>
 
-                            <p className="mt-2 text-sm text-gray-500">{isSignup ? "Get started with your workspace" : "Sign in to manage your workspace"}</p>
+                            <p className="mt-2 text-sm text-gray-500">
+                                {isSignup
+                                    ? "Get started with your workspace"
+                                    : "Sign in to manage your workspace"}
+                            </p>
                         </div>
 
                         {isSignup ? <SignUpForm /> : <SignInForm />}
 
                         <p className="mt-4 text-center text-sm text-gray-500">
-                            {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
+                            {isSignup
+                                ? "Already have an account?"
+                                : "Don't have an account?"}{" "}
+
                             <Link
                                 href={isSignup ? "/" : "/sign-up"}
                                 className="font-semibold text-blue-600 hover:underline"
@@ -55,14 +66,32 @@ export default function AuthContainer({
                         </p>
                     </div>
 
-                    <p className="hidden text-center text-xs text-gray-400 md:block">© 2026 Expinova. All rights reserved.</p>
+                    {/* Conditional footer */}
+                    <footer className="mt-8 shrink-0 px-2 text-center text-[11px] leading-relaxed text-gray-400 md:mt-0">
+                        {isSignup ? (
+                            <p>
+                                By creating an account, you agree to our{" "}
+                                <span className="font-medium text-slate-600 underline underline-offset-2">
+                                    Terms of Service
+                                </span>{" "}
+                                and{" "}
+                                <span className="font-medium text-slate-600 underline underline-offset-2">
+                                    Privacy Policy
+                                </span>
+                                .
+                            </p>
+                        ) : (
+                            <p>
+                                © 2026 Expinova. All rights reserved.
+                            </p>
+                        )}
+                    </footer>
+
                 </div>
 
-                {/* Right: existing stats panel */}
+                {/* Right: Branding and statistics */}
                 <AuthStatsPanel />
 
-                {/* Mobile footer */}
-                <footer className="bg-white px-4 py-5 text-center text-xs text-gray-400 md:hidden">© 2026 Expinova. All rights reserved.</footer>
             </div>
         </div>
     );
