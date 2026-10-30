@@ -64,7 +64,7 @@ export default function AuthStatsPanel() {
                     Manage your workspace in one place.
                 </p>
 
-                <div className="mt-5 rounded-xl bg-white p-3 text-slate-900 shadow-lg md:mt-6 md:p-5">
+                <div className="mt-10 rounded-xl bg-white p-3 text-slate-900 shadow-lg md:mt-11 md:p-5">
                     <h3 className="text-sm font-semibold md:text-base">
                         Expinova Dashboard
                     </h3>

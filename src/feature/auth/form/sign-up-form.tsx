@@ -74,7 +74,7 @@ export default function SignUpForm() {
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-3"
         >
-            <div>
+            <div className="space-y-1.5">
                 <Label htmlFor="signup-name">Full Name</Label>
                 <Input
                     id="signup-name"
@@ -96,7 +96,7 @@ export default function SignUpForm() {
                 <Input
                     id="signup-email"
                     type="email"
-                    placeholder="name@company.com"
+                    placeholder="Enter your email"
                     autoComplete="email"
                     {...register("email")}
                     aria-invalid={!!errors.email}

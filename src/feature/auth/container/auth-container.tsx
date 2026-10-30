@@ -15,7 +15,7 @@ export default function AuthContainer({
     const isSignup = mode === "signup";
 
     return (
-        <div className="min-h-dvh bg-[#f3f4f8] p-3 sm:p-4 md:h-dvh md:overflow-hidden">
+        <div className="min-h-dvh bg-[#f3f4f8] p-2 sm:p-1 md:h-dvh md:overflow-hidden">
             <div className="mx-auto grid w-full max-w-7xl grid-cols-1 overflow-hidden rounded-2xl bg-white md:h-full md:min-h-0 md:grid-cols-2 md:grid-rows-1">
 
                 {/* Left: Authentication panel */}

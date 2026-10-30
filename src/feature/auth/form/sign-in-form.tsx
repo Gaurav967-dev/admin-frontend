@@ -78,7 +78,7 @@ export default function SignInForm() {
                     id="signin-email"
                     type="email"
                     autoComplete="email"
-                    placeholder="name@company.com"
+                    placeholder="Enter your email"
                     {...register("email")}
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? "signin-email-error" : undefined}
