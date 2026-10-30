@@ -21,7 +21,7 @@ export default function SignInForm() {
     const router = useRouter();
     const queryClient = useQueryClient();
 
-    const { register, handleSubmit, setError, formState: { errors, isSubmitting }} = useForm<SignInValues>({
+    const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<SignInValues>({
         resolver: zodResolver(signInSchema),
         mode: "onBlur",
         reValidateMode: "onChange",
@@ -32,7 +32,7 @@ export default function SignInForm() {
     });
 
     async function onSubmit(values: SignInValues) {
-        try{
+        try {
             const result = await signIn(values);
 
             toast.success("Signed in successfully");
@@ -40,7 +40,7 @@ export default function SignInForm() {
 
             router.replace(getHomeRoute(result.user.role));
             router.refresh();
-        } catch(error){
+        } catch (error) {
             if (
                 applyServerValidationErrors<SignInValues>(
                     error,
@@ -58,7 +58,7 @@ export default function SignInForm() {
                 });
                 return;
             }
-            
+
             setError("root.server", {
                 type: "server",
                 message: error instanceof Error ? error.message : "Unable to sign in",
@@ -92,7 +92,7 @@ export default function SignInForm() {
 
             <div className="space-y-1.5">
                 <Label htmlFor="signin-password">Password</Label>
-                
+
                 <div className="relative">
                     <PasswordInput
                         id="signin-password"
