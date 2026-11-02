@@ -6,9 +6,9 @@ export function useDeleteUser() {
 
     return useMutation({
         mutationFn: deleteUser,
-        
-        onSuccess: (_, userId) => {
-            queryClient.invalidateQueries({
+
+        onSuccess: async (_, userId) => {
+            await queryClient.invalidateQueries({
                 queryKey: ["users"],
             });
 

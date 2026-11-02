@@ -11,10 +11,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import FieldError from "@/components/custom-ui/field-error";
 
 import { createUserSchema, editUserSchema, type UserFormValues } from "../schema/user-schema";
-import { createUser, updateUser } from "@/service/user-service";
+import { useCreateUser } from "@/hooks/users/use-create-user";
+import { useUpdateUser } from "@/hooks/users/use-update-user";
 import { ApiError } from "@/lib/api";
 import { applyServerValidationErrors } from "@/lib/form-errors";
-import { useMutation } from "@tanstack/react-query";
 import PasswordInput from "@/components/custom-ui/password-input";
 import type { DashboardUser } from "@/types/dashboard";
 
@@ -41,23 +41,8 @@ export default function UserFormDialog({
 }: Props) {
     const isEdit = editingUser !== null;
 
-    const saveUserMutation = useMutation({
-        mutationFn: async (values: UserFormValues) => {
-            const { password, ...commonValues } = values;
-
-            if (editingUser) {
-                return updateUser(editingUser.id, {
-                    ...commonValues,
-                    ...(password ? { password } : {}),
-                });
-            }
-
-            return createUser({
-                ...commonValues,
-                password,
-            });
-        },
-    });
+    const createUserMutation = useCreateUser();
+    const updateUserMutation = useUpdateUser();
 
     const {
         register,
@@ -94,7 +79,20 @@ export default function UserFormDialog({
 
     async function onSubmit(values: UserFormValues) {
         try {
-            const result = await saveUserMutation.mutateAsync(values);
+            const { password, ...commonValues } = values;
+
+            const result = editingUser
+                ? await updateUserMutation.mutateAsync({
+                    userId: editingUser.id,
+                    payload: {
+                        ...commonValues,
+                        ...(password ? { password } : {}),
+                    },
+                })
+                : await createUserMutation.mutateAsync({
+                    ...commonValues,
+                    password,
+                });
 
             onSaved(result.message);
             onOpenChange(false);

@@ -1,9 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { getUserById } from "@/service/user-service";
+import { useUser } from "@/hooks/users/use-user";
 import type { DashboardUser } from "@/types/dashboard";
 
 type Props = {
@@ -23,22 +22,7 @@ export default function ViewUserDialog({
         isPending,
         isFetching,
         refetch,
-    } = useQuery({
-        queryKey: ["users", "detail", userId],
-
-        queryFn: () => {
-            if (userId === undefined) {
-                throw new Error("No user selected");
-            }
-
-            return getUserById(userId);
-        },
-
-        enabled: userId !== undefined,
-        refetchOnMount: "always",
-        staleTime: 0,
-        retry: false,
-    });
+    } = useUser(userId);
 
     const loading = isPending || isFetching;
 

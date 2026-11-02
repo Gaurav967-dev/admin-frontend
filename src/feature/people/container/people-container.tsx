@@ -12,7 +12,6 @@ import DeleteUserDialog from "../form/delete-user-dialog";
 import { useUserData } from "@/hooks/users/use-user-data";
 import type { DashboardUser } from "@/types/dashboard";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
     management?: boolean;
@@ -47,7 +46,6 @@ export default function PeopleContainer({
     const [editingUser, setEditingUser] = useState<DashboardUser | null>(null);
     const [deletingUser, setDeletingUser] = useState<DashboardUser | null>(null);
     const [formOpen, setFormOpen] = useState(false);
-    const queryClient = useQueryClient();
 
     function openCreate() {
         setEditingUser(null);
@@ -61,10 +59,6 @@ export default function PeopleContainer({
 
     function handleSaved(message: string) {
         toast.success(message);
-
-        void queryClient.invalidateQueries({
-            queryKey: ["users"],
-        });
     }
 
     function handleDeleted(
@@ -79,14 +73,9 @@ export default function PeopleContainer({
             pageRows.length === 1 &&
             pageRows[0].id === deletedUserId;
 
-        // Don't leave the user on an empty last page.
         if (deletedLastRow) {
             setPage((current) => current - 1);
         }
-
-        void queryClient.invalidateQueries({
-            queryKey: ["users"],
-        });
     }
 
     return (

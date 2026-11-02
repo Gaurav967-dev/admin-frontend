@@ -7,8 +7,8 @@ export function useCreateUser() {
     return useMutation({
         mutationFn: createUser,
 
-        onSuccess: () => {
-            queryClient.invalidateQueries({
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
                 queryKey: ["users"],
             });
         },

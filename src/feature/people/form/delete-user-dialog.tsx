@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { deleteUser } from "@/service/user-service";
-import { useMutation } from "@tanstack/react-query";
+import { useDeleteUser } from "@/hooks/users/use-delete-user";
 import type { DashboardUser } from "@/types/dashboard";
 
 type DeleteUserDialogProps = {
@@ -18,9 +17,7 @@ export default function DeleteUserDialog({
     onOpenChange,
     onDeleted,
 }: DeleteUserDialogProps) {
-    const deleteMutation = useMutation({
-        mutationFn: deleteUser,
-    });
+    const deleteMutation = useDeleteUser();
 
     const loading = deleteMutation.isPending;
     const [error, setError] = useState("");
