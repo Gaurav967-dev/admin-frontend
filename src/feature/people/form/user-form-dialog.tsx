@@ -303,9 +303,10 @@ export default function UserFormDialog({
 
                                 <p className="mt-1 text-xs text-slate-500">
                                     {isEdit
-                                        ? "Uncheck to deactivate this account."
-                                        : "Active Account must be checked to create a user."
-                                    }
+                                        ? editingUser?.is_active
+                                            ? "Uncheck to deactivate this account."
+                                            : "Check to activate this account."
+                                        : "Active Account must be checked to create a user."}
                                 </p>
                             </div>
                         </div>
