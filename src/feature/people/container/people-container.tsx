@@ -9,7 +9,7 @@ import ViewUserDialog from "../table/view-user-dialog";
 import UserFormDialog from "../form/user-form-dialog";
 import DeleteUserDialog from "../form/delete-user-dialog";
 
-import { useUserData } from "@/hooks/use-user-data";
+import { useUserData } from "@/hooks/users/use-user-data";
 import type { DashboardUser } from "@/types/dashboard";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
