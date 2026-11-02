@@ -70,7 +70,7 @@ export default function UserFormDialog({
         resolver: zodResolver(
             isEdit ? editUserSchema : createUserSchema
         ),
-        mode: "onBlur",
+        mode: "onChange",
         reValidateMode: "onChange",
         defaultValues,
     });
@@ -171,32 +171,27 @@ export default function UserFormDialog({
                     {/* Name */}
                     <div className="space-y-2">
                         <Label htmlFor="user-name">
-                            Full Name <span className="text-red-600" aria-hidden="true">*</span>
+                            Full Name{" "}
+                            <span className="text-red-600" aria-hidden="true">
+                                *
+                            </span>
                         </Label>
 
-                        <Controller
-                            name="name"
-                            control={control}
-                            render={({ field }) => (
-                                <Input
-                                    id="user-name"
-                                    name={field.name}
-                                    ref={field.ref}
-                                    value={field.value}
-                                    onBlur={field.onBlur}
-                                    onChange={(event) => {
-                                        const lettersOnly = event.target.value.replace(/[^\p{L} ]/gu, "");
-                                        field.onChange(lettersOnly);
-                                    }}
-                                    placeholder="Enter full name"
-                                    autoComplete="name"
-                                    required
-                                    aria-invalid={!!errors.name}
-                                />
-                            )}
+                        <Input
+                            id="user-name"
+                            placeholder="Enter full name"
+                            autoComplete="name"
+                            {...register("name")}
+                            aria-invalid={!!errors.name}
+                            aria-describedby={
+                                errors.name ? "user-name-error" : undefined
+                            }
                         />
 
-                        <FieldError message={errors.name?.message} />
+                        <FieldError
+                            id="user-name-error"
+                            message={errors.name?.message}
+                        />
                     </div>
 
                     {/* Email */}

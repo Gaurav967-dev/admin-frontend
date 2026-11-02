@@ -5,7 +5,7 @@ const nameSchema = z.string().trim().min(1, "Full name is required")
     .max(100, "Name is too long")
     .regex(
         /^\p{L}+(?: +\p{L}+)*$/u,
-        "Name must conatin letters and spaces only"
+        "Name must contain letters and spaces only"
     );
 
 const emailSchema = z.string().trim().min(1, "Email is required")
