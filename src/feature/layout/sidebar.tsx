@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { apiFetch } from "@/lib/api";
-
+import { useLogout } from "@/hooks/auth/use-logout";
 import { LayoutGridIcon } from "@/components/icons/layout-grid";
 import { UsersIcon } from "@/components/icons/users";
 import { UserIcon } from "@/components/icons/user";
@@ -12,7 +11,6 @@ import { FileTextIcon } from "@/components/icons/file-text";
 import { LogoutIcon } from "@/components/icons/logout";
 import { ChevronRight } from "lucide-react";
 import type { AuthenticatedUser } from "@/types/dashboard";
-import { useQueryClient } from "@tanstack/react-query";
 
 const adminMenuItems = [
     {
@@ -48,10 +46,10 @@ export default function Sidebar({
 }: SidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
-    const [loggingOut, setLoggingOut] = useState(false);
     const [logoutError, setLogoutError] = useState("");
+    const logoutMutation = useLogout();
+    const loggingOut = logoutMutation.isPending;
     const isAdmin = user.role === "admin";
-    const queryClient = useQueryClient();
 
     const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
         "Admin View": isAdmin && pathname !== "/profile",
@@ -79,24 +77,15 @@ export default function Sidebar({
     ];
 
     async function handleLogout() {
-        setLoggingOut(true);
         setLogoutError("");
 
         try {
-            await apiFetch<{ message: string }>(
-                "/logout",
-                {
-                    method: "POST",
-                }
-            );
-            queryClient.clear();
+            await logoutMutation.mutateAsync();
 
             router.replace("/");
             router.refresh();
         } catch (error) {
             setLogoutError(error instanceof Error ? error.message : "Could not sign out. Please retry.");
-        } finally {
-            setLoggingOut(false);
         }
     }
 

@@ -2,10 +2,9 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import DashboardShell from "@/feature/layout/dashboard-shell";
-import { apiFetch, ApiError } from "@/lib/api";
-import type { VerifyResponse } from "@/types/dashboard";
+import { useCurrentUser } from "@/hooks/auth/use-current-user";
+import { ApiError } from "@/lib/api";
 
 export default function ProtectedLayout({
     children,
@@ -21,16 +20,7 @@ export default function ProtectedLayout({
         isPending,
         isFetching,
         refetch,
-    } = useQuery<VerifyResponse, Error>({
-        queryKey: ["auth", "current-user"],
-
-        queryFn: () =>
-            apiFetch<VerifyResponse>("/verify-token"),
-
-        staleTime: 0,
-        refetchOnMount: "always",
-        retry: false,
-    });
+    } = useCurrentUser();
 
     const user = data?.user ?? null;
 

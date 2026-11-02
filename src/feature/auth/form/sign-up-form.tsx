@@ -9,17 +9,16 @@ import { Label } from "@/components/ui/label";
 import FieldError from "@/components/custom-ui/field-error";
 
 import { signUpSchema, type SignUpValues } from "../schema/auth-schema";
-import { signUp } from "@/service/auth-service";
+import { useSignUp } from "@/hooks/auth/use-sign-up";
 import { ApiError } from "@/lib/api";
 import { getHomeRoute } from "@/lib/role-routes";
 import { toast } from "sonner";
 import { applyServerValidationErrors } from "@/lib/form-errors";
 import PasswordInput from "@/components/custom-ui/password-input";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function SignUpForm() {
     const router = useRouter();
-    const queryClient = useQueryClient();
+    const signUpMutation = useSignUp();
 
     const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<SignUpValues>({
         resolver: zodResolver(signUpSchema),
@@ -30,10 +29,9 @@ export default function SignUpForm() {
 
     async function onSubmit(values: SignUpValues) {
         try {
-            const result = await signUp(values);
+            const result = await signUpMutation.mutateAsync(values);
 
             toast.success("Account created successfully");
-            queryClient.clear();
 
             router.replace(getHomeRoute(result.user.role));
             router.refresh();

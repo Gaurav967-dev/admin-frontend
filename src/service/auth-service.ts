@@ -1,6 +1,6 @@
 import { apiFetch } from "@/lib/api";
-import type { AuthenticatedUser } from "@/types/dashboard"
 import type { SignInValues, SignUpValues } from "@/feature/auth/schema/auth-schema";
+import type { VerifyResponse, AuthenticatedUser } from "@/types/dashboard";
 
 type AuthResponse = {
     message: string;
@@ -19,6 +19,16 @@ export function signUp(values: SignUpValues) {
 
     return apiFetch<AuthResponse>("/signup", {
         method: "POST",
-        body: JSON.stringify({name, email, password}),
+        body: JSON.stringify({ name, email, password }),
+    });
+}
+
+export function verifyCurrentUser() {
+    return apiFetch<VerifyResponse>("/verify-token");
+}
+
+export function logoutUser() {
+    return apiFetch<{ message: string }>("/logout", {
+        method: "POST",
     });
 }
