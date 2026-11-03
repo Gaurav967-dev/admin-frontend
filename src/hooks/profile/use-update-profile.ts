@@ -18,21 +18,22 @@ export function useUpdateProfile() {
             existingProfile,
         }) => updateEmployeeProfile(values, existingProfile),
 
-        onSuccess: async (result) => {
-            queryClient.setQueryData<ProfileData>(
-                ["profile"],
-                result.profile
-            );
+        onSuccess: async (result, variables) => {
+            queryClient.setQueryData(["profile"], result.profile);
 
-            await Promise.all([
-                queryClient.invalidateQueries({
+            const previousName = `${variables.existingProfile.first_name} ${variables.existingProfile.last_name}`.trim();
+
+            const updatedName = `${result.profile.first_name} ${result.profile.last_name}`.trim();
+
+            if (previousName !== updatedName) {
+                await queryClient.invalidateQueries({
                     queryKey: ["auth", "current-user"],
-                }),
+                });
 
-                queryClient.invalidateQueries({
+                await queryClient.invalidateQueries({
                     queryKey: ["users"],
-                }),
-            ]);
+                });
+            }
         },
     });
 }
