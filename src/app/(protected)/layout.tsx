@@ -37,7 +37,6 @@ export default function ProtectedLayout({
         user.role !== "admin" &&
         adminOnlyPage;
 
-    // Navigation side effect, not API data fetching.
     useEffect(() => {
         if (isAuthError) {
             router.replace("/");

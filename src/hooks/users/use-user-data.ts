@@ -152,7 +152,6 @@ export function useUserData(management: boolean) {
 
     return {
         data,
-
         page,
         pageSize,
         pageInput,
@@ -167,16 +166,11 @@ export function useUserData(management: boolean) {
         startRow,
         endRow,
 
-        // Pagination actions.
         setPage,
         setPageInput,
         changePageSize,
         goToPage,
-
-        // Filter action.
         changeFilter,
-
-        // Refresh users.
         refetch: query.refetch,
     };
 }

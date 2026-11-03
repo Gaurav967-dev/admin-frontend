@@ -4,7 +4,7 @@ import { FormProvider } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import ProfileHeader from "../components/profile-header";
 import ProfileForm from "../form/profile-form";
-import { useProfile } from "@/hooks/use-profile";
+import { useProfile } from "@/hooks/profile/use-profile";
 
 export default function ProfileContainer() {
     const {
