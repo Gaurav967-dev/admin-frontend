@@ -136,7 +136,7 @@ function notifyApiError(
         0: "Unable to connect to the server.",
         400: error.message,
         401: error.message || "Unauthorized request.",
-        403: "You do not have permission to perform this action.",
+        403: error.message || "You do not have permission to perform this action.",
         404: error.message || "Requested resource not found.",
         409: error.message,
         422: "Please correct the highlighted form fields.",
