@@ -38,12 +38,23 @@ export default function ProtectedLayout({
         adminOnlyPage;
 
     useEffect(() => {
+        // Wait until session verification or token refresh finishes.
+        if (isPending || isFetching) {
+            return;
+        }
+
         if (isAuthError) {
             router.replace("/");
         } else if (mustRedirect) {
             router.replace("/profile");
         }
-    }, [isAuthError, mustRedirect, router]);
+    }, [
+        isAuthError,
+        isFetching,
+        isPending,
+        mustRedirect,
+        router,
+    ]);
 
     if (isPending || isFetching) {
         return (
